@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Saved Offers{% endblock %}
+
+{% block body %}
+<div style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;">
+    <h1>My Saved Offers</h1>
+
+    {% for message in app.flashes('success') %}
+        <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+        <div style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if savedOffers|length > 0 %}
+        <table style="width: 100%; border-collapse: collapse; background: white; margin-top: 1rem;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd;">Title</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd;">Company</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd;">Location</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd;">Type</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd;">Saved On</th>
+                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for savedOffer in savedOffers %}
+                    <tr>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">
+                            <a href="{{ path('candidate_offer_detail', {slug: savedOffer.jobOffer.slug}) }}" style="color: #007bff; text-decoration: none;">
+                                {{ savedOffer.jobOffer.title }}
+                            </a>
+                        </td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ savedOffer.jobOffer.company.name }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ savedOffer.jobOffer.location ?? 'Not specified' }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ savedOffer.jobOffer.type }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">{{ savedOffer.createdAt|date('Y-m-d H:i') }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid #ddd;">
+                            <form method="post" action="{{ path('candidate_unsave_offer', {id: savedOffer.id}) }}" style="display: inline;">
+                                <button type="submit" style="background: #dc3545; color: white; padding: 0.25rem 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.875rem;">
+                                    Remove
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div style="background: white; padding: 2rem; border-radius: 8px; text-align: center; margin-top: 1rem;">
+            <p style="color: #666;">You haven't saved any offers yet.</p>
+            <a href="{{ path('candidate_offers_list') }}" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">
+                Browse Offers
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

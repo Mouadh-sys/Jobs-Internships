@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\JobOffer;
 use App\Form\JobOfferType;
 use App\Repository\JobOfferRepository;
+use App\Service\AdminLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,9 +53,33 @@ class AdminOfferController extends AbstractController
     }
 
     #[Route('/{id}/toggle', name: 'admin_offer_toggle', methods: ['POST'])]
-    public function toggle(JobOffer $jobOffer, EntityManagerInterface $entityManager): Response
-    {
-        // TODO: Toggle job offer active status
+    public function toggle(
+        JobOffer $jobOffer,
+        EntityManagerInterface $entityManager,
+        AdminLogService $adminLogService
+    ): Response {
+        $oldStatus = $jobOffer->isActive();
+        $jobOffer->setActive(!$oldStatus);
+        $jobOffer->setUpdatedAt(new \DateTimeImmutable());
+
+        $entityManager->flush();
+
+        // Log the action
+        $admin = $this->getUser();
+        $action = $jobOffer->isActive() ? 'ACTIVATE' : 'DEACTIVATE';
+        $adminLogService->log(
+            $admin,
+            $action,
+            'JobOffer',
+            (string) $jobOffer->getId(),
+            ['previous_status' => $oldStatus, 'new_status' => $jobOffer->isActive()]
+        );
+
+        $this->addFlash('success', sprintf(
+            'Job offer "%s" has been %s.',
+            $jobOffer->getTitle(),
+            $jobOffer->isActive() ? 'activated' : 'deactivated'
+        ));
 
         return $this->redirectToRoute('admin_offers_list');
     }

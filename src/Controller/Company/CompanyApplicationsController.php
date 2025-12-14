@@ -44,10 +44,29 @@ class CompanyApplicationsController extends AbstractController
     #[Route('/{id}/accept', name: 'company_application_accept', methods: ['POST'])]
     public function accept(Application $application, EntityManagerInterface $entityManager): Response
     {
-        // TODO: Accept application
-        // - Update status to ACCEPTED
-        // - Send email to candidate
-        // - Log action
+        // Verify ownership - check if the application belongs to company's job offer
+        $user = $this->getUser();
+        $company = $user->getCompany();
+
+        if (!$company || $application->getJobOffer()->getCompany() !== $company) {
+            throw $this->createAccessDeniedException('You do not have access to this application.');
+        }
+
+        if ($application->isAccepted()) {
+            $this->addFlash('warning', 'Application is already accepted.');
+            return $this->redirectToRoute('company_applications_list');
+        }
+
+        $application->setStatus(Application::STATUS_ACCEPTED);
+        $application->setUpdatedAt(new \DateTimeImmutable());
+        $entityManager->flush();
+
+        // TODO: Send email to candidate
+
+        $this->addFlash('success', sprintf(
+            'Application from %s has been accepted.',
+            $application->getCandidate()->getFullName()
+        ));
 
         return $this->redirectToRoute('company_applications_list');
     }
@@ -55,10 +74,29 @@ class CompanyApplicationsController extends AbstractController
     #[Route('/{id}/reject', name: 'company_application_reject', methods: ['POST'])]
     public function reject(Application $application, EntityManagerInterface $entityManager): Response
     {
-        // TODO: Reject application
-        // - Update status to REJECTED
-        // - Send email to candidate
-        // - Log action
+        // Verify ownership - check if the application belongs to company's job offer
+        $user = $this->getUser();
+        $company = $user->getCompany();
+
+        if (!$company || $application->getJobOffer()->getCompany() !== $company) {
+            throw $this->createAccessDeniedException('You do not have access to this application.');
+        }
+
+        if ($application->isRejected()) {
+            $this->addFlash('warning', 'Application is already rejected.');
+            return $this->redirectToRoute('company_applications_list');
+        }
+
+        $application->setStatus(Application::STATUS_REJECTED);
+        $application->setUpdatedAt(new \DateTimeImmutable());
+        $entityManager->flush();
+
+        // TODO: Send email to candidate
+
+        $this->addFlash('success', sprintf(
+            'Application from %s has been rejected.',
+            $application->getCandidate()->getFullName()
+        ));
 
         return $this->redirectToRoute('company_applications_list');
     }

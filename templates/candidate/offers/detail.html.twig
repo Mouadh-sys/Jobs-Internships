@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Job Offer: {{ offer.title }}{% endblock %}
+
+{% block body %}
+<div style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;">
+    {% for message in app.flashes('success') %}
+        <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+        <div style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h1>{{ offer.title }}</h1>
+        <p style="color: #666; margin: 0.5rem 0;">
+            <strong>Company:</strong> {{ offer.company.name }}<br>
+            <strong>Location:</strong> {{ offer.location ?? 'Not specified' }}<br>
+            <strong>Type:</strong> {{ offer.type }}<br>
+            <strong>Category:</strong> {{ offer.category.name }}<br>
+            <strong>Status:</strong> {{ offer.isActive ? 'Active' : 'Inactive' }}
+        </p>
+
+        <div style="margin: 1.5rem 0; padding-top: 1rem; border-top: 1px solid #ddd;">
+            <h2>Description</h2>
+            <p style="white-space: pre-wrap;">{{ offer.description }}</p>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            {% if isSaved %}
+                <form method="post" action="{{ path('candidate_offer_unsave', {id: offer.id}) }}" style="display: inline;">
+                    <button type="submit" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                        Unsave Offer
+                    </button>
+                </form>
+            {% else %}
+                <form method="post" action="{{ path('candidate_offer_save', {id: offer.id}) }}" style="display: inline;">
+                    <button type="submit" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                        Save Offer
+                    </button>
+                </form>
+            {% endif %}
+            <a href="{{ path('candidate_offers_list') }}" style="display: inline-block; padding: 0.5rem 1rem; background: #6c757d; color: white; text-decoration: none; border-radius: 4px;">
+                Back to List
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
