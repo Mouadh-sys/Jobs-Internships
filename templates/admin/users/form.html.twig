@@ -1,0 +1,35 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ user.id ? 'Edit' : 'Create' }} User{% endblock %}
+
+{% block body %}
+<h2>{{ user.id ? 'Edit' : 'Create' }} User</h2>
+
+{{ form_start(form) }}
+    <div class="form-group">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {{ form_errors(form.email) }}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.fullName) }}
+        {{ form_widget(form.fullName) }}
+        {{ form_errors(form.fullName) }}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password) }}
+        {{ form_errors(form.password) }}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.roles) }}
+        {{ form_widget(form.roles) }}
+        {{ form_errors(form.roles) }}
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{{ path('admin_users_list') }}" class="btn">Cancel</a>
+    </div>
+{{ form_end(form) }}
+{% endblock %}
+

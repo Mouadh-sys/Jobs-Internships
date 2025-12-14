@@ -1,0 +1,61 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Job Offers{% endblock %}
+
+{% block body %}
+<h2>Job Offers Management</h2>
+
+<form method="get" style="margin: 1rem 0; display: flex; gap: 1rem;">
+    <select name="status">
+        <option value="">All</option>
+        <option value="active" {{ status == 'active' ? 'selected' : '' }}>Active</option>
+        <option value="inactive" {{ status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Category</th>
+            <th>Type</th>
+            <th>Active</th>
+            <th>Applications</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for offer in offers %}
+        <tr>
+            <td>{{ offer.id }}</td>
+            <td>{{ offer.title }}</td>
+            <td>{{ offer.company.name }}</td>
+            <td>{{ offer.category.name }}</td>
+            <td>{{ offer.type }}</td>
+            <td>{{ offer.isActive ? 'Yes' : 'No' }}</td>
+            <td>{{ offer.applications|length }}</td>
+            <td>
+                <a href="{{ path('admin_offer_show', {id: offer.id}) }}" class="btn btn-primary">View</a>
+                <a href="{{ path('admin_offer_edit', {id: offer.id}) }}" class="btn btn-warning">Edit</a>
+                <form method="post" action="{{ path('admin_offer_toggle', {id: offer.id}) }}" style="display: inline;">
+                    <button type="submit" class="btn {{ offer.isActive ? 'btn-warning' : 'btn-success' }}">
+                        {{ offer.isActive ? 'Deactivate' : 'Activate' }}
+                    </button>
+                </form>
+                <form method="post" action="{{ path('admin_offer_delete', {id: offer.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="8">No job offers found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+

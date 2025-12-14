@@ -1,0 +1,23 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}User Details{% endblock %}
+
+{% block body %}
+<h2>User Details</h2>
+<a href="{{ path('admin_users_list') }}" class="btn">Back to List</a>
+<a href="{{ path('admin_user_edit', {id: user.id}) }}" class="btn btn-warning">Edit</a>
+
+<div style="background: white; padding: 2rem; margin-top: 1rem; border-radius: 8px;">
+    <p><strong>ID:</strong> {{ user.id }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Full Name:</strong> {{ user.fullName }}</p>
+    <p><strong>Roles:</strong> {{ user.roles|join(', ') }}</p>
+    <p><strong>Location:</strong> {{ user.location ?? 'N/A' }}</p>
+    <p><strong>CV:</strong> {{ user.cvFilename ?? 'No CV uploaded' }}</p>
+    <p><strong>Created At:</strong> {{ user.createdAt|date('Y-m-d H:i:s') }}</p>
+    {% if user.company %}
+    <p><strong>Company:</strong> {{ user.company.name }}</p>
+    {% endif %}
+</div>
+{% endblock %}
+

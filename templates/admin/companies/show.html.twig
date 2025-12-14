@@ -1,0 +1,23 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Company Details{% endblock %}
+
+{% block body %}
+<h2>Company Details</h2>
+<a href="{{ path('admin_companies_list') }}" class="btn">Back to List</a>
+<a href="{{ path('admin_company_edit', {id: company.id}) }}" class="btn btn-warning">Edit</a>
+
+<div style="background: white; padding: 2rem; margin-top: 1rem; border-radius: 8px;">
+    <p><strong>ID:</strong> {{ company.id }}</p>
+    <p><strong>Name:</strong> {{ company.name }}</p>
+    <p><strong>Owner:</strong> {{ company.user.email }}</p>
+    <p><strong>Description:</strong> {{ company.description ?? 'N/A' }}</p>
+    <p><strong>Website:</strong> {{ company.website ?? 'N/A' }}</p>
+    <p><strong>Location:</strong> {{ company.location ?? 'N/A' }}</p>
+    <p><strong>Approved:</strong> {{ company.isApproved ? 'Yes' : 'No' }}</p>
+    <p><strong>Active:</strong> {{ company.isActive ? 'Yes' : 'No' }}</p>
+    <p><strong>Job Offers:</strong> {{ company.jobOffers|length }}</p>
+    <p><strong>Created At:</strong> {{ company.createdAt|date('Y-m-d H:i:s') }}</p>
+</div>
+{% endblock %}
+
