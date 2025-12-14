@@ -5,7 +5,6 @@ namespace App\Controller\Admin;
 use App\Entity\Company;
 use App\Form\AdminCompanyType;
 use App\Repository\CompanyRepository;
-use App\Service\AdminLogService;
 use App\Service\CompanyApprovalService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,82 +18,46 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminCompanyController extends AbstractController
 {
     #[Route('', name: 'admin_companies_list', methods: ['GET'])]
-    public function list(Request $request, CompanyRepository $companyRepository): Response
+    public function list(CompanyRepository $companyRepository): Response
     {
-        $status = $request->query->get('status');
-
-        $companies = $companyRepository->findAll();
-
-        // Filter by status
-        if ($status === 'approved') {
-            $companies = array_filter($companies, fn($c) => $c->isApproved());
-        } elseif ($status === 'pending') {
-            $companies = array_filter($companies, fn($c) => !$c->isApproved());
-        } elseif ($status === 'active') {
-            $companies = array_filter($companies, fn($c) => $c->isActive());
-        } elseif ($status === 'inactive') {
-            $companies = array_filter($companies, fn($c) => !$c->isActive());
-        }
+        // TODO: List all companies with pagination
+        // - Show approval status
+        // - Show active status
+        // - Filter by status
 
         return $this->render('admin/companies/list.html.twig', [
-            'companies' => $companies,
-            'status' => $status,
+            // TODO: Pass companies
         ]);
     }
 
     #[Route('/pending', name: 'admin_companies_pending', methods: ['GET'])]
     public function pending(CompanyRepository $companyRepository): Response
     {
-        $pendingCompanies = $companyRepository->findBy(['isApproved' => false]);
+        // TODO: List pending companies for approval
 
         return $this->render('admin/companies/pending.html.twig', [
-            'companies' => $pendingCompanies,
+            // TODO: Pass pending companies
         ]);
     }
 
     #[Route('/{id}', name: 'admin_company_show', methods: ['GET'])]
     public function show(Company $company): Response
     {
+        // TODO: Show company details
+
         return $this->render('admin/companies/show.html.twig', [
             'company' => $company,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'admin_company_edit', methods: ['GET', 'POST'])]
-    public function edit(
-        Company $company,
-        Request $request,
-        EntityManagerInterface $entityManager,
-        AdminLogService $adminLogService,
-    ): Response {
-        $oldData = [
-            'name' => $company->getName(),
-            'isApproved' => $company->isApproved(),
-            'isActive' => $company->isActive(),
-        ];
-
-        $form = $this->createForm(AdminCompanyType::class, $company);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            // Log the action
-            $adminLogService->logUpdate($this->getUser(), 'Company', $company->getId(), [
-                'old' => $oldData,
-                'new' => [
-                    'name' => $company->getName(),
-                    'isApproved' => $company->isApproved(),
-                    'isActive' => $company->isActive(),
-                ],
-            ]);
-
-            $this->addFlash('success', 'Company updated successfully.');
-            return $this->redirectToRoute('admin_companies_list');
-        }
+    public function edit(Company $company, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        // TODO: Edit company
+        // - Use AdminCompanyType form
 
         return $this->render('admin/companies/form.html.twig', [
-            'form' => $form,
+            // TODO: Pass form
             'company' => $company,
         ]);
     }
@@ -104,8 +67,10 @@ class AdminCompanyController extends AbstractController
         Company $company,
         CompanyApprovalService $approvalService,
     ): Response {
-        $approvalService->approve($company, $this->getUser());
-        $this->addFlash('success', 'Company approved successfully.');
+        // TODO: Approve company
+        // - Use CompanyApprovalService
+        // - Send approval email
+
         return $this->redirectToRoute('admin_companies_pending');
     }
 
@@ -115,30 +80,18 @@ class AdminCompanyController extends AbstractController
         Request $request,
         CompanyApprovalService $approvalService,
     ): Response {
-        $reason = $request->request->get('reason', '');
-        $approvalService->reject($company, $this->getUser(), $reason);
-        $this->addFlash('success', 'Company rejected successfully.');
+        // TODO: Reject company
+        // - Use CompanyApprovalService
+        // - Include rejection reason
+
         return $this->redirectToRoute('admin_companies_pending');
     }
 
     #[Route('/{id}/delete', name: 'admin_company_delete', methods: ['POST'])]
-    public function delete(
-        Company $company,
-        EntityManagerInterface $entityManager,
-        AdminLogService $adminLogService,
-    ): Response {
-        $companyId = $company->getId();
-        $companyName = $company->getName();
+    public function delete(Company $company, EntityManagerInterface $entityManager): Response
+    {
+        // TODO: Delete company and related data
 
-        $entityManager->remove($company);
-        $entityManager->flush();
-
-        // Log the action
-        $adminLogService->logDelete($this->getUser(), 'Company', $companyId, [
-            'name' => $companyName,
-        ]);
-
-        $this->addFlash('success', 'Company deleted successfully.');
         return $this->redirectToRoute('admin_companies_list');
     }
 }

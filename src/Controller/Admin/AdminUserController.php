@@ -5,7 +5,6 @@ namespace App\Controller\Admin;
 use App\Entity\User;
 use App\Form\AdminUserType;
 use App\Repository\UserRepository;
-use App\Service\AdminLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,32 +18,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminUserController extends AbstractController
 {
     #[Route('', name: 'admin_users_list', methods: ['GET'])]
-    public function list(Request $request, UserRepository $userRepository): Response
+    public function list(UserRepository $userRepository): Response
     {
-        $role = $request->query->get('role');
-        $search = $request->query->get('search');
-        
-        $users = $userRepository->findAll();
-        
-        // Filter by role
-        if ($role) {
-            $users = array_filter($users, function(User $user) use ($role) {
-                return in_array($role, $user->getRoles(), true);
-            });
-        }
-        
-        // Search by email or name
-        if ($search) {
-            $users = array_filter($users, function(User $user) use ($search) {
-                return stripos($user->getEmail(), $search) !== false 
-                    || stripos($user->getFullName(), $search) !== false;
-            });
-        }
+        // TODO: List all users with pagination and filters
+        // - Filter by role
+        // - Search by email or name
 
         return $this->render('admin/users/list.html.twig', [
-            'users' => $users,
-            'role' => $role,
-            'search' => $search,
+            // TODO: Pass users
         ]);
     }
 
@@ -53,29 +34,14 @@ class AdminUserController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
-        AdminLogService $adminLogService,
     ): Response {
+        // TODO: Create new user
+        // - Use AdminUserType form
+        // - Hash password
+        // - Send welcome email
+
         $user = new User();
-        $form = $this->createForm(AdminUserType::class, $user, ['edit' => false]);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Hash password
-            $hashedPassword = $passwordHasher->hashPassword($user, $user->getPassword());
-            $user->setPassword($hashedPassword);
-
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            // Log the action
-            $adminLogService->logCreate($this->getUser(), 'User', $user->getId(), [
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-            ]);
-
-            $this->addFlash('success', 'User created successfully.');
-            return $this->redirectToRoute('admin_users_list');
-        }
+        $form = $this->createForm(AdminUserType::class, $user);
 
         return $this->render('admin/users/form.html.twig', [
             'form' => $form,
@@ -89,69 +55,30 @@ class AdminUserController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
-        AdminLogService $adminLogService,
     ): Response {
-        $oldData = [
-            'email' => $user->getEmail(),
-            'roles' => $user->getRoles(),
-        ];
-        
-        $form = $this->createForm(AdminUserType::class, $user, ['edit' => true]);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Update password only if provided
-            $plainPassword = $form->get('password')->getData();
-            if ($plainPassword) {
-                $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-                $user->setPassword($hashedPassword);
-            }
-
-            $entityManager->flush();
-
-            // Log the action
-            $adminLogService->logUpdate($this->getUser(), 'User', $user->getId(), [
-                'old' => $oldData,
-                'new' => [
-                    'email' => $user->getEmail(),
-                    'roles' => $user->getRoles(),
-                ],
-            ]);
-
-            $this->addFlash('success', 'User updated successfully.');
-            return $this->redirectToRoute('admin_users_list');
-        }
+        // TODO: Edit user
+        // - Use AdminUserType form with edit mode
+        // - Optional password change
 
         return $this->render('admin/users/form.html.twig', [
-            'form' => $form,
+            // TODO: Pass form
             'user' => $user,
         ]);
     }
 
     #[Route('/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
-    public function delete(
-        User $user,
-        EntityManagerInterface $entityManager,
-        AdminLogService $adminLogService,
-    ): Response {
-        $userId = $user->getId();
-        $userEmail = $user->getEmail();
+    public function delete(User $user, EntityManagerInterface $entityManager): Response
+    {
+        // TODO: Delete user and related data
 
-        $entityManager->remove($user);
-        $entityManager->flush();
-
-        // Log the action
-        $adminLogService->logDelete($this->getUser(), 'User', $userId, [
-            'email' => $userEmail,
-        ]);
-
-        $this->addFlash('success', 'User deleted successfully.');
         return $this->redirectToRoute('admin_users_list');
     }
 
     #[Route('/{id}', name: 'admin_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
+        // TODO: Show user details
+
         return $this->render('admin/users/show.html.twig', [
             'user' => $user,
         ]);

@@ -1,64 +1,69 @@
-# Jobs & Internships - Complete Management System
+# Jobs & Internships - Backend API
 
-A comprehensive job and internship management platform built with **Symfony 7**, **Doctrine ORM**, and **MySQL**.
+Un système complet de gestion d'offres d'emploi et de stages construit avec **Symfony 7**, **Doctrine ORM**, et **MySQL**.
 
-## 🚀 Features
+## 🚀 Fonctionnalités
 
-### User Roles & Permissions
-- **ROLE_USER** (Candidate): Browse offers, apply, save favorites, manage profile
-- **ROLE_COMPANY** (Employer): Post jobs, view applicants, manage offers, company profile
-- **ROLE_ADMIN** (Administrator): Manage users, approve companies, moderate offers, view statistics and logs
+### Rôles et Permissions
+- **ROLE_USER** (Candidat) : Parcourir les offres, postuler, sauvegarder
+- **ROLE_COMPANY** (Entreprise) : Créer des offres, gérer les candidatures
+- **ROLE_ADMIN** (Administrateur) : Gérer les utilisateurs, approuver les entreprises, logs
 
-### Admin Dashboard (Fully Implemented ✅)
-- **Statistics Dashboard**: Real-time stats for users, companies, offers, and applications
-- **User Management**: Create, edit, delete, and view all users with role filtering
-- **Company Management**: Approve/reject companies, edit company details, view pending approvals
-- **Job Offer Management**: List, edit, activate/deactivate, and delete job offers
-- **Category Management**: Create, edit, delete categories with hierarchical support
-- **Activity Logs**: Complete audit trail of all admin actions with filtering and CSV export
+### Structure MVC
+- **Entités Doctrine** : User, Company, JobOffer, Application, Category, Skill, SavedOffer, AdminLog
+- **Repositories** : Requêtes personnalisées pour chaque entité
+- **Services** : ApplicationService, AdminLogService, CompanyApprovalService
+- **Formulaires** : Form Types pour CRUD
+- **Contrôleurs** : Groupés par rôle (Candidate, Company, Admin)
+- **Templates Twig** : Structure organisée par section
 
-## 📋 Prerequisites
+## 📋 Prérequis
 
 - PHP 8.2+
 - MySQL 8.0+
 - Composer
-- Symfony CLI (optional)
+- Symfony CLI (optionnel mais recommandé)
 
 ## 🔧 Installation
 
-### 1. Install Dependencies
+### 1. Cloner et installer
 ```bash
+git clone <repository-url>
+cd Jobs-Internships
 composer install
 ```
 
-### 2. Configure Database
-Edit `.env` and set your `DATABASE_URL`:
+### 2. Configurer la base de données
+Éditer `.env` et vérifier la `DATABASE_URL` :
 ```
 DATABASE_URL="mysql://root:@127.0.0.1:3306/jobs_internships_db?serverVersion=8.0"
 ```
 
-### 3. Setup Database
+### 3. Créer la base de données et les tables
 ```bash
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 ```
 
-### 4. Start Server
+### 4. Charger les données de test (optionnel)
 ```bash
-# Using PHP built-in server
-php -S localhost:8000 -t public
-
-# Or using Symfony CLI
-symfony serve
+php bin/console doctrine:fixtures:load
 ```
 
-Access the application at `http://localhost:8000`
+### 5. Lancer le serveur
+```bash
+symfony serve
+# ou
+php bin/console server:run
+```
 
-## 📁 Project Structure
+L'application sera accessible à `http://localhost:8000`
+
+## 📁 Structure du Projet
 
 ```
 src/
-├── Entity/              # Doctrine entities
+├── Entity/              # Entités Doctrine
 │   ├── User.php
 │   ├── Company.php
 │   ├── JobOffer.php
@@ -67,210 +72,173 @@ src/
 │   ├── Skill.php
 │   ├── SavedOffer.php
 │   └── AdminLog.php
-├── Repository/          # Custom repositories
-├── Service/             # Business logic services
+├── Repository/          # Repositories personnalisés
+├── Service/             # Services métier
 │   ├── ApplicationService.php
 │   ├── AdminLogService.php
 │   └── CompanyApprovalService.php
-├── Form/                # Form types
-├── Controller/          # Controllers grouped by role
+├── Form/                # Form Types
+├── Controller/          # Contrôleurs groupés par rôle
 │   ├── Candidate/
 │   ├── Company/
-│   └── Admin/           # ✅ Fully implemented
-└── Security/            # Authentication
+│   └── Admin/
+└── Security/            # Authentification (à implémenter)
 
 templates/
-├── admin/               # ✅ Admin templates (fully implemented)
-│   ├── base.html.twig
-│   ├── stats/
-│   ├── users/
-│   ├── companies/
-│   ├── offers/
-│   ├── categories/
-│   └── logs/
-├── candidate/           # Candidate templates
-├── company/             # Company templates
-└── security/            # Login/register templates
+├── candidate/           # Templates candidat
+├── company/             # Templates entreprise
+├── admin/               # Templates admin
+├── emails/              # Templates d'emails
+└── security/            # Templates login/register
+
+config/
+├── packages/
+│   ├── security.yaml    # Configuration sécurité + hiérarchie des rôles
+│   └── doctrine.yaml
+└── routes.yaml          # Routes principales
+
+public/
+└── uploads/
+    ├── cv/              # Dossier upload des CV
+    └── logos/           # Dossier upload des logos entreprise
+
+migrations/              # Migrations Doctrine
+
 ```
 
-## 🔐 Security Configuration
+## 🔐 Configuration de Sécurité
 
-Role hierarchy in `config/packages/security.yaml`:
+La hiérarchie des rôles dans `config/packages/security.yaml` :
 ```yaml
 role_hierarchy:
     ROLE_ADMIN: ROLE_COMPANY
     ROLE_COMPANY: ROLE_USER
 ```
 
-### Route Access
-- `/admin/*` → ROLE_ADMIN only
-- `/company/*` → ROLE_COMPANY required
-- `/candidate/*` → ROLE_USER required
+### Accès aux routes
+- `/admin/*` → Réservé à ROLE_ADMIN
+- `/company/*` → Réservé à ROLE_COMPANY
+- `/candidate/*` → Réservé à ROLE_USER
 - `/login`, `/register` → Public
 
-## 📚 Admin Endpoints (Fully Implemented)
+## 📚 Endpoints Principaux
 
-### Statistics
-- `GET /admin/stats` - Dashboard with comprehensive statistics
-- `GET /admin/stats/users` - Detailed user statistics
-- `GET /admin/stats/companies` - Company statistics
-- `GET /admin/stats/applications` - Application statistics
+### Candidat
+- `GET/POST /candidate/profile` - Profil candidat
+- `GET /candidate/offers` - Parcourir les offres
+- `GET /candidate/offers/{slug}` - Détail offre
+- `POST /candidate/offers/{id}/apply` - Postuler
+- `GET /candidate/applications` - Mes candidatures
+- `POST /candidate/offers/{id}/save` - Sauvegarder une offre
 
-### User Management
-- `GET /admin/users` - List all users (with filters: role, search)
-- `GET /admin/users/create` - Create new user
-- `GET|POST /admin/users/{id}/edit` - Edit user
-- `GET /admin/users/{id}` - View user details
-- `POST /admin/users/{id}/delete` - Delete user
+### Entreprise
+- `GET/POST /company/profile` - Profil entreprise
+- `GET /company/offers` - Mes offres
+- `POST /company/offers/create` - Créer une offre
+- `GET /company/applications` - Candidatures reçues
+- `POST /company/applications/{id}/accept` - Accepter
+- `POST /company/applications/{id}/reject` - Rejeter
 
-### Company Management
-- `GET /admin/companies` - List all companies (with status filters)
-- `GET /admin/companies/pending` - List pending approvals
-- `GET /admin/companies/{id}` - View company details
-- `GET|POST /admin/companies/{id}/edit` - Edit company
-- `POST /admin/companies/{id}/approve` - Approve company
-- `POST /admin/companies/{id}/reject` - Reject company (with reason)
-- `POST /admin/companies/{id}/delete` - Delete company
+### Admin
+- `GET /admin/users` - Gestion utilisateurs
+- `GET /admin/companies` - Gestion entreprises
+- `GET /admin/companies/pending` - Approuver les entreprises
+- `GET /admin/offers` - Gestion des offres
+- `GET /admin/categories` - Gestion des catégories
+- `GET /admin/logs` - Logs d'activité
+- `GET /admin/stats` - Tableau de bord statistiques
 
-### Job Offer Management
-- `GET /admin/offers` - List all offers (with status filters)
-- `GET /admin/offers/{id}` - View offer details
-- `GET|POST /admin/offers/{id}/edit` - Edit offer
-- `POST /admin/offers/{id}/toggle` - Activate/deactivate offer
-- `POST /admin/offers/{id}/delete` - Delete offer
+## 🛠️ Développement
 
-### Category Management
-- `GET /admin/categories` - List all categories
-- `GET|POST /admin/categories/create` - Create category (auto-generates slug)
-- `GET|POST /admin/categories/{id}/edit` - Edit category
-- `GET /admin/categories/{id}` - View category details
-- `POST /admin/categories/{id}/delete` - Delete category (validates no linked offers)
-
-### Activity Logs
-- `GET /admin/logs` - List logs (with filters: admin, entity type, action, date range)
-- `GET /admin/logs/{id}` - View log details
-- `GET /admin/logs/export` - Export logs as CSV
-
-## 🛠️ Development
-
-### Create Migration
+### Créer une nouvelle migration
 ```bash
 php bin/console make:migration
 php bin/console doctrine:migrations:migrate
 ```
 
-### Create Entity
+### Générer une nouvelle entité
 ```bash
 php bin/console make:entity
 ```
 
-### Create Form Type
+### Créer un form type
 ```bash
 php bin/console make:form
 ```
 
-### Create Controller
+### Créer un contrôleur
 ```bash
 php bin/console make:controller
 ```
 
-### Clear Cache
-```bash
-php bin/console cache:clear
-```
+## ✅ Checklist Implémentation
 
-### List Routes
-```bash
-php bin/console debug:router
-```
+Chaque contrôleur et service contient des **TODO** indiquant ce qui doit être implémenté :
 
-## ✅ Implementation Status
+- [ ] Implémenter la logique des contrôleurs
+- [ ] Créer les templates Twig
+- [ ] Ajouter la validation des formulaires
+- [ ] Implémenter les règles métier dans les services
+- [ ] Configurer les uploads de fichiers
+- [ ] Ajouter les email notifications
+- [ ] Créer les fixtures de test
+- [ ] Écrire les tests unitaires
+- [ ] Implémenter l'authentification complète
 
-### ✅ Completed (Admin Module)
-- [x] AdminStatsController - Dashboard with comprehensive statistics
-- [x] AdminUserController - Full CRUD with filtering and search
-- [x] AdminCompanyController - Company management with approval workflow
-- [x] AdminOfferController - Job offer moderation
-- [x] AdminCategoryController - Category management with validation
-- [x] AdminLogController - Activity logging with filters and export
-- [x] AdminLogService - Complete logging service integration
-- [x] CompanyApprovalService - Approval/rejection workflow
-- [x] All admin Twig templates created
-- [x] Form handling and validation
-- [x] Flash messages for user feedback
-- [x] Security with role-based access control
+## 📧 Configuration Email
 
-### 🔄 In Progress / To Do
-- [ ] Authentication controller (login/register)
-- [ ] Candidate controllers implementation
-- [ ] Company controllers implementation
-- [ ] File upload handling (CV, logos)
-- [ ] Email notifications
-- [ ] Test fixtures
-- [ ] Unit tests
-- [ ] Pagination for large lists
-
-## 🗄️ Database Schema
-
-### Entities & Relations
-- **User** (1) ←→ (1) **Company** : Company owner
-- **User** (1) ←→ (n) **Application** : Candidate applications
-- **User** (1) ←→ (n) **SavedOffer** : Saved job offers
-- **User** (m) ←→ (n) **Skill** : User skills
-- **User** (1) ←→ (n) **AdminLog** : Admin activity logs
-
-- **Company** (1) ←→ (n) **JobOffer** : Published offers
-- **JobOffer** (1) ←→ (n) **Application** : Applications per offer
-- **JobOffer** (1) ←→ (n) **SavedOffer** : Saved offers
-- **JobOffer** (n) ←→ (1) **Category** : Offer category
-
-- **Category** (1) ←→ (n) **Category** : Hierarchical categories
-
-## 📧 Email Configuration
-
-To enable email notifications, edit `.env`:
+Pour activer les notifications par email, éditer `.env` :
 ```
 MAILER_DSN=smtp://user:pass@smtp.example.com:587?encryption=tls
 ```
 
-Then uncomment email sending in services (CompanyApprovalService, etc.)
+Puis décommenter les appels à `$this->mailer->send()` dans les services.
 
-## 🧪 Testing
+## 🗄️ Base de Données
 
-### Run Tests
-```bash
-php bin/phpunit
-```
+### Entités et Relations
+- **User** (1) ←→ (1) **Company** : Propriétaire d'entreprise
+- **User** (1) ←→ (n) **Application** : Candidature d'un candidat
+- **User** (1) ←→ (n) **SavedOffer** : Offres sauvegardées
+- **User** (m) ←→ (n) **Skill** : Compétences du candidat
+- **User** (1) ←→ (n) **AdminLog** : Logs créés par un admin
 
-### Create Test
+- **Company** (1) ←→ (n) **JobOffer** : Offres publiées
+- **JobOffer** (1) ←→ (n) **Application** : Candidatures pour une offre
+- **JobOffer** (1) ←→ (n) **SavedOffer** : Offres sauvegardées
+- **JobOffer** (n) ←→ (1) **Category** : Catégorie de l'offre
+
+- **Category** (1) ←→ (n) **Category** : Catégories hiérarchiques
+- **Category** (1) ←→ (n) **JobOffer** : Offres dans la catégorie
+
+## 🧪 Tests
+
+À implémenter avec PHPUnit :
 ```bash
 php bin/console make:test
 ```
 
-## 📝 Code Conventions
+## 📝 Convention de Codage
 
-- Use **Symfony Attributes** for routes and validation
-- Constructor injection for dependencies
-- Immutable dates (DateTimeImmutable)
-- Repository patterns for queries
-- Services for business logic
-- Form Types for validation
-- All admin actions are logged via AdminLogService
+- Utiliser les **Attributes Symfony** pour les routes et la validation
+- Constructeur pour l'injection de dépendances
+- Immutabilité des dates (DateTimeImmutable)
+- Repository patterns pour les requêtes
+- Services pour la logique métier
+- Form Types pour la validation
 
-## 🐛 Troubleshooting
+## 🐛 Dépannage
 
-### Database Connection Error
+### Erreur : "No such file or directory"
+Vérifier que la base de données existe :
 ```bash
-php bin/console doctrine:database:create --if-not-exists
-php bin/console doctrine:migrations:migrate
+php bin/console doctrine:database:create
 ```
 
-### Cache Issues
-```bash
-php bin/console cache:clear
-```
+### Erreur d'import d'entités
+S'assurer que le namespace est correct et que le fichier existe.
 
-### Permission Issues (Linux/Mac)
+### Permissions de dossier
 ```bash
 chmod -R 755 public/uploads/
 chmod -R 777 var/
@@ -278,11 +246,12 @@ chmod -R 777 var/
 
 ## 📞 Support
 
-- [Symfony Documentation](https://symfony.com/doc)
-- [Doctrine Documentation](https://www.doctrine-project.org/projects/doctrine-orm/en/latest/index.html)
+Pour les questions ou problèmes, consulter :
+- [Documentation Symfony](https://symfony.com/doc)
+- [Documentation Doctrine](https://www.doctrine-project.org/projects/doctrine-orm/en/latest/index.html)
+- Issues du projet
 
 ---
 
-**Project Status:** Admin module fully implemented and tested ✅
+**Maintenant prêt à être push sur GitHub !** 🚀
 
-**Last Updated:** December 2024

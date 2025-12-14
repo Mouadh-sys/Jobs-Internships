@@ -22,20 +22,21 @@ class AdminStatsController extends AbstractController
         JobOfferRepository $jobOfferRepository,
         ApplicationRepository $applicationRepository,
     ): Response {
+        // TODO: Show admin dashboard with statistics
+        // - Total users count
+        // - Total companies count (approved/pending)
+        // - Total job offers count
+        // - Total applications count
+        // - Applications by status
+        // - Recent activities
+
         $stats = [
-            'totalUsers' => $userRepository->count([]),
-            'totalCompanies' => $companyRepository->count([]),
-            'approvedCompanies' => $companyRepository->count(['isApproved' => true]),
-            'pendingCompanies' => $companyRepository->count(['isApproved' => false]),
-            'activeCompanies' => $companyRepository->count(['isActive' => true]),
-            'inactiveCompanies' => $companyRepository->count(['isActive' => false]),
-            'totalOffers' => $jobOfferRepository->count([]),
-            'activeOffers' => $jobOfferRepository->count(['isActive' => true]),
-            'inactiveOffers' => $jobOfferRepository->count(['isActive' => false]),
-            'totalApplications' => $applicationRepository->count([]),
-            'pendingApplications' => $applicationRepository->count(['status' => 'PENDING']),
-            'acceptedApplications' => $applicationRepository->count(['status' => 'ACCEPTED']),
-            'rejectedApplications' => $applicationRepository->count(['status' => 'REJECTED']),
+            'totalUsers' => 0,
+            'totalCompanies' => 0,
+            'approvedCompanies' => 0,
+            'pendingCompanies' => 0,
+            'totalOffers' => 0,
+            'totalApplications' => 0,
         ];
 
         return $this->render('admin/stats/dashboard.html.twig', [
@@ -46,78 +47,30 @@ class AdminStatsController extends AbstractController
     #[Route('/users', name: 'admin_stats_users', methods: ['GET'])]
     public function userStats(UserRepository $userRepository): Response
     {
-        $users = $userRepository->findAll();
-
-        $stats = [
-            'total' => count($users),
-            'byRole' => [
-                'ROLE_USER' => 0,
-                'ROLE_COMPANY' => 0,
-                'ROLE_ADMIN' => 0,
-            ],
-            'withCompany' => 0,
-            'withCV' => 0,
-        ];
-
-        foreach ($users as $user) {
-            foreach ($user->getRoles() as $role) {
-                if (isset($stats['byRole'][$role])) {
-                    $stats['byRole'][$role]++;
-                }
-            }
-            if ($user->getCompany() !== null) {
-                $stats['withCompany']++;
-            }
-            if ($user->getCvFilename() !== null) {
-                $stats['withCV']++;
-            }
-        }
+        // TODO: Show detailed user statistics
 
         return $this->render('admin/stats/users.html.twig', [
-            'stats' => $stats,
+            // TODO: Pass statistics
         ]);
     }
 
     #[Route('/companies', name: 'admin_stats_companies', methods: ['GET'])]
     public function companyStats(CompanyRepository $companyRepository): Response
     {
-        $companies = $companyRepository->findAll();
-
-        $stats = [
-            'total' => count($companies),
-            'approved' => $companyRepository->count(['isApproved' => true]),
-            'pending' => $companyRepository->count(['isApproved' => false]),
-            'active' => $companyRepository->count(['isActive' => true]),
-            'inactive' => $companyRepository->count(['isActive' => false]),
-            'withOffers' => 0,
-            'totalOffers' => 0,
-        ];
-
-        foreach ($companies as $company) {
-            $offersCount = $company->getJobOffers()->count();
-            if ($offersCount > 0) {
-                $stats['withOffers']++;
-                $stats['totalOffers'] += $offersCount;
-            }
-        }
+        // TODO: Show detailed company statistics
 
         return $this->render('admin/stats/companies.html.twig', [
-            'stats' => $stats,
+            // TODO: Pass statistics
         ]);
     }
 
     #[Route('/applications', name: 'admin_stats_applications', methods: ['GET'])]
     public function applicationStats(ApplicationRepository $applicationRepository): Response
     {
-        $stats = [
-            'total' => $applicationRepository->count([]),
-            'pending' => $applicationRepository->count(['status' => 'PENDING']),
-            'accepted' => $applicationRepository->count(['status' => 'ACCEPTED']),
-            'rejected' => $applicationRepository->count(['status' => 'REJECTED']),
-        ];
+        // TODO: Show detailed application statistics
 
         return $this->render('admin/stats/applications.html.twig', [
-            'stats' => $stats,
+            // TODO: Pass statistics
         ]);
     }
 }
