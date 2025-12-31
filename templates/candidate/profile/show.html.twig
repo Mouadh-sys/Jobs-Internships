@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block body %}
+    <h1>My Profile</h1>
+
+    <div class="profile-info">
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Full Name:</strong> {{ user.fullName }}</p>
+        <p><strong>Location:</strong> {{ user.location|default('Not set') }}</p>
+        <p><strong>Member Since:</strong> {{ user.createdAt|date('Y-m-d') }}</p>
+    </div>
+
+    {% if user.skills|length > 0 %}
+        <h3>Skills</h3>
+        <ul>
+        {% for skill in user.skills %}
+            <li>{{ skill.name }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No skills added yet.</p>
+    {% endif %}
+
+    {% if user.cvFilename %}
+        <p>
+            <strong>CV:</strong>
+            <a href="{{ path('candidate_cv_download') }}" class="btn">Download CV</a>
+        </p>
+    {% else %}
+        <p><em>No CV uploaded yet.</em></p>
+    {% endif %}
+
+    <a href="{{ path('candidate_profile_edit') }}" class="btn">Edit Profile</a>
+    <a href="{{ path('logout') }}" class="btn">Logout</a>
+{% endblock %}
+

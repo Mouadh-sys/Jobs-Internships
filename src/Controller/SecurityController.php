@@ -3,32 +3,25 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    #[Route(path: '/login', name: 'login')]
+    #[Route('/login', name: 'login', methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
-
         return $this->render('security/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
+            'last_username' => $authenticationUtils->getLastUsername(),
+            'error' => $authenticationUtils->getLastAuthenticationError(),
         ]);
     }
 
-    #[Route(path: '/logout', name: 'logout')]
+    #[Route('/logout', name: 'logout', methods: ['GET'])]
     public function logout(): void
     {
-        // controller can be blank: it will be intercepted by the logout key on your firewall
-        throw new \Exception('This should never be reached!');
+        // Symfony intercepts this automatically.
+        throw new \LogicException('This should never be reached.');
     }
 }
-

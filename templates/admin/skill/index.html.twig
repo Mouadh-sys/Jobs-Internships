@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Skills{% endblock %}
+
+{% block body %}
+    <h1>Skills Management</h1>
+
+    <a href="{{ path('admin_skill_new') }}" class="btn">Add New Skill</a>
+
+    {% if skills|length > 0 %}
+        <table border="1" cellpadding="10">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for skill in skills %}
+                <tr>
+                    <td>{{ skill.name }}</td>
+                    <td>{{ skill.slug }}</td>
+                    <td>
+                        <a href="{{ path('admin_skill_edit', {id: skill.id}) }}" class="btn btn-sm">Edit</a>
+                        <form method="post" action="{{ path('admin_skill_delete', {id: skill.id}) }}" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ skill.id) }}" />
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No skills found. <a href="{{ path('admin_skill_new') }}">Create one</a></p>
+    {% endif %}
+
+    <a href="/admin">Back to Admin Dashboard</a>
+{% endblock %}
+
