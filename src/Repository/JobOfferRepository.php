@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\JobOffer;
 use App\Entity\Category;
+use App\Entity\Company;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -56,12 +57,24 @@ class JobOfferRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByCompanyId(int $companyId): array
+    /**
+     * Find job offers for a company
+     * @param Company|int $company Company entity or ID
+     * @return JobOffer[]
+     */
+    public function findByCompanyId(Company|int $company): array
     {
-        return $this->createQueryBuilder('j')
-            ->where('j.company = :company')
-            ->setParameter('company', $companyId)
-            ->orderBy('j.createdAt', 'DESC')
+        $qb = $this->createQueryBuilder('j');
+
+        if ($company instanceof Company) {
+            $qb->where('IDENTITY(j.company) = :companyId')
+                ->setParameter('companyId', $company->getId());
+        } else {
+            $qb->where('IDENTITY(j.company) = :companyId')
+                ->setParameter('companyId', $company);
+        }
+
+        return $qb->orderBy('j.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }

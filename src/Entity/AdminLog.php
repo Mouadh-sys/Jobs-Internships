@@ -34,7 +34,7 @@ class AdminLog
     #[Assert\NotBlank]
     private ?string $entityId = null;
 
-    #[ORM\Column(type: 'json', nullable: true)]
+    #[ORM\Column(type: 'json', nullable: true, options: ['comment' => '(DC2Type:json)'])]
     private ?array $data = null;
 
     #[ORM\Column(type: 'datetime_immutable')]

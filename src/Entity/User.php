@@ -16,6 +16,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 ])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    // Add role constants for clarity
+    public const ROLE_USER = 'ROLE_USER';
+    public const ROLE_COMPANY = 'ROLE_COMPANY';
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -29,7 +34,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column]
+    #[ORM\Column(type: 'json', options: ['comment' => '(DC2Type:json)'])]
     private array $roles = [];
 
     #[ORM\Column]
@@ -63,19 +68,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Application>
      */
-    #[ORM\OneToMany(mappedBy: 'candidate', targetEntity: Application::class, cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: Application::class, mappedBy: 'candidate', cascade: ['remove'])]
     private Collection $applications;
 
     /**
      * @var Collection<int, SavedOffer>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: SavedOffer::class, cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: SavedOffer::class, mappedBy: 'user', cascade: ['remove'])]
     private Collection $savedOffers;
 
     /**
      * @var Collection<int, AdminLog>
      */
-    #[ORM\OneToMany(mappedBy: 'admin', targetEntity: AdminLog::class)]
+    #[ORM\OneToMany(targetEntity: AdminLog::class, mappedBy: 'admin')]
     private Collection $adminLogs;
 
     public function __construct()
@@ -163,8 +168,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+     // to implement if needed
     }
 
     public function getFullName(): ?string
@@ -361,5 +365,3 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return in_array('ROLE_ADMIN', $this->roles, true);
     }
 }
-
-

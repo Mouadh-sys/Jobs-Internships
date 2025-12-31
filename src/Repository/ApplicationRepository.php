@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Application;
 use App\Entity\User;
+use App\Entity\JobOffer;
 use App\Entity\Company;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -52,24 +53,54 @@ class ApplicationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByJobOfferId(int $jobOfferId): array
+    /**
+     * Find applications for a job offer
+     * @param JobOffer|int $jobOffer JobOffer entity or ID
+     * @return Application[]
+     */
+    public function findByJobOfferId(JobOffer|int $jobOffer): array
     {
-        return $this->createQueryBuilder('a')
-            ->where('a.jobOffer = :jobOffer')
-            ->setParameter('jobOffer', $jobOfferId)
-            ->orderBy('a.createdAt', 'DESC')
+        $qb = $this->createQueryBuilder('a');
+
+        if ($jobOffer instanceof JobOffer) {
+            $qb->where('IDENTITY(a.jobOffer) = :jobOfferId')
+                ->setParameter('jobOfferId', $jobOffer->getId());
+        } else {
+            $qb->where('IDENTITY(a.jobOffer) = :jobOfferId')
+                ->setParameter('jobOfferId', $jobOffer);
+        }
+
+        return $qb->orderBy('a.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }
 
-    public function findByJobOfferAndCandidate(int $jobOfferId, int $candidateId): ?Application
+    /**
+     * Find an application by job offer and candidate
+     * @param JobOffer|int $jobOffer JobOffer entity or ID
+     * @param User|int $candidate User entity or ID
+     */
+    public function findByJobOfferAndCandidate(JobOffer|int $jobOffer, User|int $candidate): ?Application
     {
-        return $this->createQueryBuilder('a')
-            ->where('a.jobOffer = :jobOffer')
-            ->andWhere('a.candidate = :candidate')
-            ->setParameter('jobOffer', $jobOfferId)
-            ->setParameter('candidate', $candidateId)
-            ->getQuery()
+        $qb = $this->createQueryBuilder('a');
+
+        if ($jobOffer instanceof JobOffer) {
+            $qb->andWhere('IDENTITY(a.jobOffer) = :jobOfferId')
+                ->setParameter('jobOfferId', $jobOffer->getId());
+        } else {
+            $qb->andWhere('IDENTITY(a.jobOffer) = :jobOfferId')
+                ->setParameter('jobOfferId', $jobOffer);
+        }
+
+        if ($candidate instanceof User) {
+            $qb->andWhere('IDENTITY(a.candidate) = :candidateId')
+                ->setParameter('candidateId', $candidate->getId());
+        } else {
+            $qb->andWhere('IDENTITY(a.candidate) = :candidateId')
+                ->setParameter('candidateId', $candidate);
+        }
+
+        return $qb->getQuery()
             ->getOneOrNullResult();
     }
 }
