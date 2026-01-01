@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Company Profile{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0">Edit Profile</h4>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(form) }}
+                        <div class="mb-3">
+                            {{ form_row(form.name, {'attr': {'class': 'form-control', 'placeholder': 'Company Name'}}) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_row(form.description, {'attr': {'class': 'form-control', 'rows': '5', 'placeholder': 'Tell us about your company...'}}) }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.website, {'attr': {'class': 'form-control', 'placeholder': 'https://example.com'}}) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.location, {'attr': {'class': 'form-control', 'placeholder': 'City, Country'}}) }}
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            {{ form_row(form.logoFilename, {'attr': {'class': 'form-control'}}) }}
+                            {% if company.logoFilename %}
+                                <div class="mt-2">
+                                    <small class="text-muted">Current Logo:</small><br>
+                                    <img src="{{ asset('uploads/logos/' ~ company.logoFilename) }}" alt="Current Logo" style="max-height: 50px;">
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('company_profile_show') }}" class="btn btn-secondary">Cancel</a>
+                            <button class="btn btn-primary px-4">{{ button_label|default('Update Profile') }}</button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

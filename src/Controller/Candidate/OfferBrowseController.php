@@ -11,58 +11,51 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/candidate/offers')]
-#[IsGranted('ROLE_USER')]
+#[Route('/offers')]
 class OfferBrowseController extends AbstractController
 {
-    #[Route('', name: 'candidate_offers_list', methods: ['GET'])]
-    public function list(
+    #[Route('/', name: 'app_offers_index', methods: ['GET'])]
+    public function index(
         Request $request,
         JobOfferRepository $jobOfferRepository,
         CategoryRepository $categoryRepository,
     ): Response {
-        // TODO: List available job offers with pagination and filters
-        // - Category filter
-        // - Location filter
-        // - Type filter (CDI, CDD, Stage, Freelance)
-        // - Keyword search
+        $page = $request->query->getInt('page', 1);
+        $limit = 10;
 
-        $offers = [];
-        $categories = $categoryRepository->findRootCategories();
+        $categoryId = $request->query->get('category');
+        $location = $request->query->get('location');
+        $type = $request->query->get('type');
+        $keyword = $request->query->get('keyword');
 
-        return $this->render('candidate/offers/list.html.twig', [
-            'offers' => $offers,
-            'categories' => $categories,
+        $category = null;
+        if ($categoryId) {
+            $category = $categoryRepository->find($categoryId);
+        }
+
+        $pagination = $jobOfferRepository->searchByFilters($category, $location, $type, $keyword, $page, $limit);
+
+        $maxPages = ceil(count($pagination) / $limit);
+
+        return $this->render('candidate/offer/index.html.twig', [
+            'offers' => $pagination,
+            'maxPages' => $maxPages,
+            'currentPage' => $page,
+            'categories' => $categoryRepository->findAll(),
+            'currentFilters' => [
+                'category' => $categoryId,
+                'location' => $location,
+                'type' => $type,
+                'keyword' => $keyword,
+            ]
         ]);
     }
 
     #[Route('/{slug}', name: 'candidate_offer_detail', methods: ['GET'])]
     public function detail(JobOffer $jobOffer): Response
     {
-        // TODO: Show job offer details
-        // - Display company info
-        // - Display applications status
-        // - Show save/apply buttons
-
-        return $this->render('candidate/offers/detail.html.twig', [
+        return $this->render('candidate/offer/detail.html.twig', [
             'offer' => $jobOffer,
-        ]);
-    }
-
-    #[Route('/search', name: 'candidate_offers_search', methods: ['POST'])]
-    public function search(Request $request, JobOfferRepository $jobOfferRepository): Response
-    {
-        // TODO: Search offers by filters
-        $filters = [
-            'category' => $request->request->get('category'),
-            'location' => $request->request->get('location'),
-            'type' => $request->request->get('type'),
-            'keyword' => $request->request->get('keyword'),
-        ];
-
-        return $this->json([
-            'message' => 'Search not implemented',
-            'filters' => $filters,
         ]);
     }
 }

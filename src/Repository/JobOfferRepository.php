@@ -26,7 +26,7 @@ class JobOfferRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function searchByFilters(?Category $category = null, ?string $location = null, ?string $type = null, ?string $keyword = null): array
+    public function searchByFilters(?Category $category = null, ?string $location = null, ?string $type = null, ?string $keyword = null, int $page = 1, int $limit = 10): \Doctrine\ORM\Tools\Pagination\Paginator
     {
         $qb = $this->createQueryBuilder('j')
             ->where('j.isActive = true');
@@ -51,16 +51,20 @@ class JobOfferRepository extends ServiceEntityRepository
                 ->setParameter('keyword', '%' . $keyword . '%');
         }
 
-        return $qb->orderBy('j.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $query = $qb->orderBy('j.createdAt', 'DESC')
+            ->getQuery();
+
+        $query->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return new \Doctrine\ORM\Tools\Pagination\Paginator($query);
     }
 
-    public function findByCompanyId(int $companyId): array
+    public function findByCompanyId(\App\Entity\Company $company): array
     {
         return $this->createQueryBuilder('j')
             ->where('j.company = :company')
-            ->setParameter('company', $companyId)
+            ->setParameter('company', $company)
             ->orderBy('j.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
