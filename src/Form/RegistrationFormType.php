@@ -13,48 +13,42 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class RegistrationFormType extends AbstractType
+class CompanyRegistrationFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email', EmailType::class, [
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Email(),
-                ],
+            ->add('companyName', TextType::class, [
+                'mapped' => false, // Set to true if User entity has this field
+                'label' => 'Company Name',
+                'constraints' => [new Assert\NotBlank(['message' => 'Please enter your company name'])],
             ])
             ->add('fullName', TextType::class, [
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(min: 2, max: 255),
-                ],
+                'label' => 'Contact Person Name',
+                'constraints' => [new Assert\NotBlank()],
+            ])
+            ->add('email', EmailType::class, [
+                'constraints' => [new Assert\NotBlank(), new Assert\Email()],
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'first_options' => ['label' => 'Password'],
+                'mapped' => false,
+                'first_options'  => ['label' => 'Password'],
                 'second_options' => ['label' => 'Repeat Password'],
-                'invalid_message' => 'Passwords must match',
+                'invalid_message' => 'The password fields must match.',
                 'constraints' => [
                     new Assert\NotBlank(),
-                    new Assert\Length(min: 8),
+                    new Assert\Length(['min' => 8, 'minMessage' => 'Security: Min 8 characters']),
                 ],
-                'mapped' => false,
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
-                'constraints' => [
-                    new Assert\IsTrue(message: 'You must agree to the terms.'),
-                ],
-            ])
-        ;
+                'constraints' => [new Assert\IsTrue(['message' => 'You must agree to our terms.'])],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => User::class,
-        ]);
+        $resolver->setDefaults(['data_class' => User::class]);
     }
 }
-

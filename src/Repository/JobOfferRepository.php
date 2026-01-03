@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\JobOffer;
 use App\Entity\Category;
-use App\Entity\Company;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -27,7 +26,7 @@ class JobOfferRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function searchByFilters(?Category $category = null, ?string $location = null, ?string $type = null, ?string $keyword = null): array
+    public function searchByFilters(?Category $category = null, ?string $location = null, ?string $type = null, ?string $keyword = null, int $page = 1, int $limit = 10): \Doctrine\ORM\Tools\Pagination\Paginator
     {
         $qb = $this->createQueryBuilder('j')
             ->where('j.isActive = true');
@@ -52,29 +51,21 @@ class JobOfferRepository extends ServiceEntityRepository
                 ->setParameter('keyword', '%' . $keyword . '%');
         }
 
-        return $qb->orderBy('j.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $query = $qb->orderBy('j.createdAt', 'DESC')
+            ->getQuery();
+
+        $query->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return new \Doctrine\ORM\Tools\Pagination\Paginator($query);
     }
 
-    /**
-     * Find job offers for a company
-     * @param Company|int $company Company entity or ID
-     * @return JobOffer[]
-     */
-    public function findByCompanyId(Company|int $company): array
+    public function findByCompanyId(\App\Entity\Company $company): array
     {
-        $qb = $this->createQueryBuilder('j');
-
-        if ($company instanceof Company) {
-            $qb->where('IDENTITY(j.company) = :companyId')
-                ->setParameter('companyId', $company->getId());
-        } else {
-            $qb->where('IDENTITY(j.company) = :companyId')
-                ->setParameter('companyId', $company);
-        }
-
-        return $qb->orderBy('j.createdAt', 'DESC')
+        return $this->createQueryBuilder('j')
+            ->where('j.company = :company')
+            ->setParameter('company', $company)
+            ->orderBy('j.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }

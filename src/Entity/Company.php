@@ -17,7 +17,7 @@ class Company
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'company', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'company')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 

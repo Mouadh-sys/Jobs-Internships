@@ -63,4 +63,15 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
+
+    public function findCandidates(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('App\Entity\Company', 'c', 'WITH', 'c.user = u')
+            ->where('c.id IS NULL')
+            ->andWhere("u.roles NOT LIKE '%ROLE_ADMIN%'")
+            ->orderBy('u.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

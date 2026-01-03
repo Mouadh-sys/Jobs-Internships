@@ -19,8 +19,10 @@ class JobOfferType extends AbstractType
     {
         $builder
             ->add('title', TextType::class, [
+                'label' => 'Job Title',
+                'attr' => ['class' => 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50'],
                 'constraints' => [
-                    new Assert\NotBlank(),
+                    new Assert\NotBlank(['message' => 'Please enter a job title']),
                     new Assert\Length(['min' => 3, 'max' => 255]),
                 ],
             ])
@@ -28,33 +30,39 @@ class JobOfferType extends AbstractType
                 'class' => Category::class,
                 'choice_label' => 'name',
                 'placeholder' => 'Select a category',
+                'label' => 'Job Category',
+                'attr' => ['class' => 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50'],
                 'constraints' => [
-                    new Assert\NotBlank(),
+                    new Assert\NotBlank(['message' => 'Please select a category']),
                 ],
-            ])
-            ->add('description', TextareaType::class, [
-                'constraints' => [
-                    new Assert\NotBlank(),
-                ],
-            ])
-            ->add('location', TextType::class, [
-                'required' => false,
             ])
             ->add('type', ChoiceType::class, [
+                'label' => 'Contract Type',
                 'choices' => [
                     'CDI (Permanent)' => 'CDI',
                     'CDD (Fixed-term)' => 'CDD',
                     'Internship' => 'Stage',
                     'Freelance' => 'Freelance',
                 ],
+                'placeholder' => 'Select contract type',
+                'attr' => ['class' => 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50'],
                 'constraints' => [
-                    new Assert\NotBlank(),
+                    new Assert\NotBlank(['message' => 'Please select a contract type']),
                 ],
             ])
-            ->add('isActive', ChoiceType::class, [
-                'choices' => [
-                    'Active' => true,
-                    'Inactive' => false,
+            ->add('location', TextType::class, [
+                'label' => 'Location (City, Country, or Remote)',
+                'required' => false,
+                'attr' => ['class' => 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50'],
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Job Description',
+                'attr' => [
+                    'class' => 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50',
+                    'rows' => 8
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(['message' => 'Please provide a job description']),
                 ],
             ])
         ;

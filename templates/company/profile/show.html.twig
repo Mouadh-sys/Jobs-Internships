@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Company Profile{% endblock %}
+
+{% block body %}
+{% include 'components/company_navbar.html.twig' %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h2 class="mb-0">{{ company.name }}</h2>
+                </div>
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        {% if company.logoFilename %}
+                            <img src="{{ asset('uploads/logos/' ~ company.logoFilename) }}" alt="{{ company.name }} Logo" class="img-fluid rounded-circle" style="max-width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center rounded-circle mx-auto" style="width: 150px; height: 150px;">
+                                <span class="text-muted">No Logo</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <h5 class="fw-bold">About Us</h5>
+                        <p class="text-muted">{{ company.description|default('No description provided.') }}</p>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold">Website</h5>
+                            {% if company.website %}
+                                <a href="{{ company.website }}" target="_blank" class="text-decoration-none">{{ company.website }}</a>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold">Location</h5>
+                            <p class="text-muted">{{ company.location|default('N/A') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center mt-3" role="alert">
+                         Status: 
+                        {% if company.isApproved %}
+                            <span class="badge bg-success ms-2">Approved</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark ms-2">Pending</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-block text-center mt-4 mb-5">
+                        <a href="{{ path('app_company_profile_edit') }}" class="btn btn-outline-primary">Edit Profile</a>
+                        <a href="{{ path('company_profile_status') }}" class="btn btn-outline-secondary">Check Status Details</a>
+                        <a href="{{ path('company_offer_create') }}" class="btn btn-success">Create New Offer</a>
+                        <a href="{{ path('company_offers_list') }}" class="btn btn-primary">Manage My Offers</a>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <div class="mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-bold mb-0">My Job Offers</h3>
+                            <a href="{{ path('company_offers_list') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                        {% if my_offers|length > 0 %}
+                            <div class="list-group">
+                                {% for offer in my_offers|slice(0, 5) %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="mb-1">{{ offer.title }}</h5>
+                                                <p class="mb-1 text-muted">
+                                                    <small>{{ offer.location|default('Remote') }} • {{ offer.type }}</small>
+                                                </p>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge {{ offer.isActive ? 'bg-success' : 'bg-secondary' }}">
+                                                    {{ offer.isActive ? 'Active' : 'Inactive' }}
+                                                </span>
+                                                <small class="text-muted">{{ offer.createdAt|date('M d') }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info text-center">
+                                <p class="mb-2">You haven't created any job offers yet.</p>
+                                <a href="{{ path('company_offer_create') }}" class="btn btn-sm btn-success">Create Your First Offer</a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <hr class="my-5">
+
+                    <div class="mb-5">
+                        <h3 class="fw-bold mb-4">Marketplace: Recent Job Offers</h3>
+                        {% if other_offers|length > 0 %}
+                            <div class="list-group">
+                                {% for offer in other_offers %}
+                                    {% if offer.company != company %}
+                                        <div class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{ offer.title }}</h5>
+                                                <small>{{ offer.createdAt|date('M d') }}</small>
+                                            </div>
+                                            <p class="mb-1">{{ offer.company.name }} - {{ offer.location }}</p>
+                                            <small class="text-muted">{{ offer.type }}</small>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">No other active offers at the moment.</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <h3 class="fw-bold mb-4">Candidates Database</h3>
+                        {% if candidates|length > 0 %}
+                            <div class="row">
+                                {% for candidate in candidates %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ candidate.fullName }}</h5>
+                                                <p class="card-text text-muted mb-1">{{ candidate.email }}</p>
+                                                {% if candidate.location %}
+                                                    <p class="card-text"><small class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ candidate.location }}</small></p>
+                                                {% endif %}
+                                                <!-- Add link to view full candidate profile if available -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">No candidates found yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
