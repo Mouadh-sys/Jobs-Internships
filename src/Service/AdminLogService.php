@@ -58,9 +58,9 @@ class AdminLogService
         return $this->log($admin, 'APPROVE', $entityType, (string) $entityId);
     }
 
-    public function logReject(User $admin, string $entityType, int $entityId): AdminLog
+    public function logReject(User $admin, string $entityType, int $entityId, array $data = []): AdminLog
     {
-        return $this->log($admin, 'REJECT', $entityType, (string) $entityId);
+        return $this->log($admin, 'REJECT', $entityType, (string) $entityId, $data);
     }
 }
 

@@ -81,5 +81,22 @@ class CompanyOfferController extends AbstractController
             'offer' => $jobOffer,
         ]);
     }
+
+    #[Route('/{id}/applications', name: 'company_offer_applications', methods: ['GET'])]
+    public function applications(JobOffer $jobOffer): Response
+    {
+        // Verify ownership
+        $user = $this->getUser();
+        if ($jobOffer->getCompany()->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You do not have access to this job offer.');
+        }
+
+        $applications = $jobOffer->getApplications();
+
+        return $this->render('company/offers/applications.html.twig', [
+            'offer' => $jobOffer,
+            'applications' => $applications,
+        ]);
+    }
 }
 

@@ -3,8 +3,11 @@
 namespace App\Controller\Candidate;
 
 use App\Entity\JobOffer;
+use App\Entity\SavedOffer;
 use App\Repository\JobOfferRepository;
 use App\Repository\CategoryRepository;
+use App\Repository\SavedOfferRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,16 +39,70 @@ class OfferBrowseController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/save', name: 'candidate_offer_save', methods: ['POST'])]
+    public function save(
+        JobOffer $jobOffer,
+        EntityManagerInterface $entityManager,
+        SavedOfferRepository $savedOfferRepository,
+    ): Response {
+        $user = $this->getUser();
+
+        // Check if already saved
+        $existingSavedOffer = $savedOfferRepository->findByUserAndJobOffer($user, $jobOffer->getId());
+        if ($existingSavedOffer) {
+            $this->addFlash('warning', 'This offer is already saved.');
+            return $this->redirectToRoute('candidate_offer_detail', ['slug' => $jobOffer->getSlug()]);
+        }
+
+        // Create SavedOffer record
+        $savedOffer = new SavedOffer();
+        $savedOffer->setUser($user);
+        $savedOffer->setJobOffer($jobOffer);
+
+        $entityManager->persist($savedOffer);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Offer saved successfully.');
+
+        return $this->redirectToRoute('candidate_offer_detail', ['slug' => $jobOffer->getSlug()]);
+    }
+
+    #[Route('/{id}/unsave', name: 'candidate_offer_unsave', methods: ['POST'])]
+    public function unsave(
+        JobOffer $jobOffer,
+        EntityManagerInterface $entityManager,
+        SavedOfferRepository $savedOfferRepository,
+    ): Response {
+        $user = $this->getUser();
+
+        $savedOffer = $savedOfferRepository->findByUserAndJobOffer($user, $jobOffer->getId());
+        if (!$savedOffer) {
+            $this->addFlash('warning', 'This offer is not in your saved list.');
+            return $this->redirectToRoute('candidate_offer_detail', ['slug' => $jobOffer->getSlug()]);
+        }
+
+        $entityManager->remove($savedOffer);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Offer removed from saved list.');
+
+        return $this->redirectToRoute('candidate_offer_detail', ['slug' => $jobOffer->getSlug()]);
+    }
+
     #[Route('/{slug}', name: 'candidate_offer_detail', methods: ['GET'])]
-    public function detail(JobOffer $jobOffer): Response
+    public function detail(JobOffer $jobOffer, SavedOfferRepository $savedOfferRepository): Response
     {
-        // TODO: Show job offer details
-        // - Display company info
-        // - Display applications status
-        // - Show save/apply buttons
+        $user = $this->getUser();
+        $isSaved = false;
+
+        if ($user) {
+            $savedOffer = $savedOfferRepository->findByUserAndJobOffer($user, $jobOffer->getId());
+            $isSaved = $savedOffer !== null;
+        }
 
         return $this->render('candidate/offers/detail.html.twig', [
             'offer' => $jobOffer,
+            'isSaved' => $isSaved,
         ]);
     }
 

@@ -1,0 +1,28 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Job Offer Details{% endblock %}
+
+{% block body %}
+<h2>Job Offer Details</h2>
+<a href="{{ path('admin_offers_list') }}" class="btn">Back to List</a>
+<a href="{{ path('admin_offer_edit', {id: offer.id}) }}" class="btn btn-warning">Edit</a>
+
+<div style="background: white; padding: 2rem; margin-top: 1rem; border-radius: 8px;">
+    <p><strong>ID:</strong> {{ offer.id }}</p>
+    <p><strong>Title:</strong> {{ offer.title }}</p>
+    <p><strong>Slug:</strong> {{ offer.slug }}</p>
+    <p><strong>Company:</strong> {{ offer.company.name }}</p>
+    <p><strong>Category:</strong> {{ offer.category.name }}</p>
+    <p><strong>Type:</strong> {{ offer.type }}</p>
+    <p><strong>Location:</strong> {{ offer.location ?? 'N/A' }}</p>
+    <p><strong>Active:</strong> {{ offer.isActive ? 'Yes' : 'No' }}</p>
+    <p><strong>Applications:</strong> {{ offer.applications|length }}</p>
+    <p><strong>Description:</strong></p>
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+        {{ offer.description|nl2br }}
+    </div>
+    <p><strong>Created At:</strong> {{ offer.createdAt|date('Y-m-d H:i:s') }}</p>
+    <p><strong>Updated At:</strong> {{ offer.updatedAt|date('Y-m-d H:i:s') }}</p>
+</div>
+{% endblock %}
+

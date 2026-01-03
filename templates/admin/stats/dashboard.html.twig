@@ -1,0 +1,63 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<h2>Statistics Dashboard</h2>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>{{ stats.totalUsers }}</h3>
+        <p>Total Users</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.totalCompanies }}</h3>
+        <p>Total Companies</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.approvedCompanies }}</h3>
+        <p>Approved Companies</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.pendingCompanies }}</h3>
+        <p>Pending Companies</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.activeCompanies }}</h3>
+        <p>Active Companies</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.inactiveCompanies }}</h3>
+        <p>Inactive Companies</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.totalOffers }}</h3>
+        <p>Total Job Offers</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.activeOffers }}</h3>
+        <p>Active Offers</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.inactiveOffers }}</h3>
+        <p>Inactive Offers</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.totalApplications }}</h3>
+        <p>Total Applications</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.pendingApplications }}</h3>
+        <p>Pending Applications</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.acceptedApplications }}</h3>
+        <p>Accepted Applications</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.rejectedApplications }}</h3>
+        <p>Rejected Applications</p>
+    </div>
+</div>
+{% endblock %}
+

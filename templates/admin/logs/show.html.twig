@@ -1,0 +1,22 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Log Details{% endblock %}
+
+{% block body %}
+<h2>Log Entry Details</h2>
+<a href="{{ path('admin_logs_list') }}" class="btn">Back to List</a>
+
+<div style="background: white; padding: 2rem; margin-top: 1rem; border-radius: 8px;">
+    <p><strong>ID:</strong> {{ log.id }}</p>
+    <p><strong>Admin:</strong> {{ log.admin.email }}</p>
+    <p><strong>Action:</strong> {{ log.action }}</p>
+    <p><strong>Entity Type:</strong> {{ log.entityType }}</p>
+    <p><strong>Entity ID:</strong> {{ log.entityId }}</p>
+    <p><strong>Created At:</strong> {{ log.createdAt|date('Y-m-d H:i:s') }}</p>
+    {% if log.data %}
+    <p><strong>Data:</strong></p>
+    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto;">{{ log.data|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+    {% endif %}
+</div>
+{% endblock %}
+

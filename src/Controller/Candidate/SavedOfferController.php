@@ -18,10 +18,11 @@ class SavedOfferController extends AbstractController
     #[Route('', name: 'candidate_saved_offers_list', methods: ['GET'])]
     public function list(SavedOfferRepository $savedOfferRepository): Response
     {
-        // TODO: List candidate saved offers
+        $user = $this->getUser();
+        $savedOffers = $savedOfferRepository->findByUser($user);
 
         return $this->render('candidate/saved_offers/list.html.twig', [
-            // TODO: Pass saved offers
+            'savedOffers' => $savedOffers,
         ]);
     }
 
@@ -31,9 +32,24 @@ class SavedOfferController extends AbstractController
         EntityManagerInterface $entityManager,
         SavedOfferRepository $savedOfferRepository,
     ): Response {
-        // TODO: Save job offer to saved list
-        // - Check if already saved
-        // - Create SavedOffer record
+        $user = $this->getUser();
+
+        // Check if already saved
+        $existingSavedOffer = $savedOfferRepository->findByUserAndJobOffer($user, $jobOffer->getId());
+        if ($existingSavedOffer) {
+            $this->addFlash('warning', 'This offer is already saved.');
+            return $this->redirectToRoute('candidate_offer_detail', ['slug' => $jobOffer->getSlug()]);
+        }
+
+        // Create SavedOffer record
+        $savedOffer = new SavedOffer();
+        $savedOffer->setUser($user);
+        $savedOffer->setJobOffer($jobOffer);
+
+        $entityManager->persist($savedOffer);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Offer saved successfully.');
 
         return $this->redirectToRoute('candidate_offer_detail', ['slug' => $jobOffer->getSlug()]);
     }
@@ -43,7 +59,17 @@ class SavedOfferController extends AbstractController
         SavedOffer $savedOffer,
         EntityManagerInterface $entityManager,
     ): Response {
-        // TODO: Remove offer from saved list
+        $user = $this->getUser();
+
+        // Verify ownership
+        if ($savedOffer->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You do not have access to this saved offer.');
+        }
+
+        $entityManager->remove($savedOffer);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Offer removed from saved list.');
 
         return $this->redirectToRoute('candidate_saved_offers_list');
     }

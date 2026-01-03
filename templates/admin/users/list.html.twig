@@ -1,0 +1,55 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Users{% endblock %}
+
+{% block body %}
+<h2>Users Management</h2>
+<a href="{{ path('admin_user_create') }}" class="btn btn-primary">Create New User</a>
+
+<form method="get" style="margin: 1rem 0; display: flex; gap: 1rem;">
+    <input type="text" name="search" placeholder="Search by email or name" value="{{ search }}">
+    <select name="role">
+        <option value="">All Roles</option>
+        <option value="ROLE_USER" {{ role == 'ROLE_USER' ? 'selected' : '' }}>User</option>
+        <option value="ROLE_COMPANY" {{ role == 'ROLE_COMPANY' ? 'selected' : '' }}>Company</option>
+        <option value="ROLE_ADMIN" {{ role == 'ROLE_ADMIN' ? 'selected' : '' }}>Admin</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Full Name</th>
+            <th>Roles</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.fullName }}</td>
+            <td>{{ user.roles|join(', ') }}</td>
+            <td>{{ user.createdAt|date('Y-m-d H:i') }}</td>
+            <td>
+                <a href="{{ path('admin_user_show', {id: user.id}) }}" class="btn btn-primary">View</a>
+                <a href="{{ path('admin_user_edit', {id: user.id}) }}" class="btn btn-warning">Edit</a>
+                <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">No users found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+

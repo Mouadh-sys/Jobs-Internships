@@ -1,0 +1,44 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Categories{% endblock %}
+
+{% block body %}
+<h2>Categories Management</h2>
+<a href="{{ path('admin_category_create') }}" class="btn btn-primary">Create New Category</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Slug</th>
+            <th>Parent</th>
+            <th>Job Offers</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.id }}</td>
+            <td>{{ category.name }}</td>
+            <td>{{ category.slug }}</td>
+            <td>{{ category.parent ? category.parent.name : 'Root' }}</td>
+            <td>{{ category.jobOffers|length }}</td>
+            <td>
+                <a href="{{ path('admin_category_show', {id: category.id}) }}" class="btn btn-primary">View</a>
+                <a href="{{ path('admin_category_edit', {id: category.id}) }}" class="btn btn-warning">Edit</a>
+                <form method="post" action="{{ path('admin_category_delete', {id: category.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">No categories found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+

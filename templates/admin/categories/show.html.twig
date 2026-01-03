@@ -1,0 +1,26 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Category Details{% endblock %}
+
+{% block body %}
+<h2>Category Details</h2>
+<a href="{{ path('admin_categories_list') }}" class="btn">Back to List</a>
+<a href="{{ path('admin_category_edit', {id: category.id}) }}" class="btn btn-warning">Edit</a>
+
+<div style="background: white; padding: 2rem; margin-top: 1rem; border-radius: 8px;">
+    <p><strong>ID:</strong> {{ category.id }}</p>
+    <p><strong>Name:</strong> {{ category.name }}</p>
+    <p><strong>Slug:</strong> {{ category.slug }}</p>
+    <p><strong>Parent:</strong> {{ category.parent ? category.parent.name : 'Root Category' }}</p>
+    <p><strong>Job Offers:</strong> {{ category.jobOffers|length }}</p>
+    {% if category.children|length > 0 %}
+    <p><strong>Subcategories:</strong></p>
+    <ul>
+        {% for child in category.children %}
+        <li>{{ child.name }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}
+
