@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Application Details{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Application Details</h2>
+
+            <div class="card" style="margin: 1.5rem 0;">
+                <div class="card-header">
+                    <h4>{{ application.jobOffer.title }}</h4>
+                    <p class="text-muted">{{ application.jobOffer.company.name }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label><strong>Status:</strong></label>
+                        <p>
+                            <span class="badge badge-{{ application.status|lower }}">
+                                {{ application.status }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label><strong>Applied At:</strong></label>
+                        <p>{{ application.createdAt|date('Y-m-d H:i:s') }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label><strong>Last Updated:</strong></label>
+                        <p>{{ application.updatedAt|date('Y-m-d H:i:s') }}</p>
+                    </div>
+
+                    {% if application.message %}
+                    <div class="mb-3">
+                        <label><strong>Your Message:</strong></label>
+                        <p>{{ application.message }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if application.cvFilename %}
+                    <div class="mb-3">
+                        <label><strong>CV Submitted:</strong></label>
+                        <p>
+                            <a href="{{ path('candidate_download_cv', {filename: application.cvFilename}) }}" class="btn btn-sm btn-secondary">
+                                Download CV
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <h5>Job Offer Details</h5>
+                    <dl class="row">
+                        <dt class="col-sm-3">Type</dt>
+                        <dd class="col-sm-9">{{ application.jobOffer.type }}</dd>
+
+                        <dt class="col-sm-3">Location</dt>
+                        <dd class="col-sm-9">{{ application.jobOffer.location ?? 'Not specified' }}</dd>
+
+                        <dt class="col-sm-3">Category</dt>
+                        <dd class="col-sm-9">{{ application.jobOffer.category.name }}</dd>
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('candidate_applications_list') }}" class="btn btn-secondary">Back to Applications</a>
+
+                    {% if not application.isAccepted and not application.isRejected and not application.isWithdrawn %}
+                    <form method="post" action="{{ path('candidate_application_withdraw', {id: application.id}) }}" style="display: inline; float: right;">
+                        {% if csrf_token('candidate_application_withdraw') %}
+                        <input type="hidden" name="_token" value="{{ csrf_token('candidate_application_withdraw') }}">
+                        {% endif %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to withdraw this application?');">
+                            Withdraw Application
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

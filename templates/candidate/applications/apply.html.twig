@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Apply to {{ offer.title }}{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2>Apply to {{ offer.title }}</h2>
+
+            <div class="card" style="margin: 1.5rem 0;">
+                <div class="card-header">
+                    <h5>{{ offer.company.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Type</dt>
+                        <dd class="col-sm-9">{{ offer.type }}</dd>
+
+                        <dt class="col-sm-3">Location</dt>
+                        <dd class="col-sm-9">{{ offer.location ?? 'Not specified' }}</dd>
+
+                        <dt class="col-sm-3">Category</dt>
+                        <dd class="col-sm-9">{{ offer.category.name }}</dd>
+                    </dl>
+
+                    <hr>
+
+                    <h5>Description</h5>
+                    <p>{{ offer.description }}</p>
+                </div>
+            </div>
+
+            <h3>Your Application</h3>
+            <form method="post" enctype="multipart/form-data">
+                {{ form_start(form) }}
+
+                <div class="form-group">
+                    {{ form_label(form.message) }}
+                    {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': 5, 'placeholder': 'Tell us why you are interested in this position...'} }) }}
+                    {{ form_errors(form.message) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.cvFilename) }}
+                    {{ form_widget(form.cvFilename, {'attr': {'class': 'form-control-file'} }) }}
+                    <small class="form-text text-muted">Maximum file size: 5MB (PDF or DOC)</small>
+                    {{ form_errors(form.cvFilename) }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+                <a href="{{ path('candidate_offers_browse') }}" class="btn btn-secondary">Cancel</a>
+
+                {{ form_end(form) }}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

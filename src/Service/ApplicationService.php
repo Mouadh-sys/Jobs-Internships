@@ -76,14 +76,18 @@ class ApplicationService
 
     private function sendApplicationNotificationEmail(Application $application): void
     {
-        // TODO: Implement email sending logic
-        $email = (new Email())
-            ->from('no-reply@jobsinternships.com')
-            ->to($application->getJobOffer()->getCompany()->getUser()->getEmail())
-            ->subject('New Application: ' . $application->getJobOffer()->getTitle())
-            ->text('New application received');
+        try {
+            $email = (new Email())
+                ->from('no-reply@jobsinternships.com')
+                ->to($application->getJobOffer()->getCompany()->getUser()->getEmail())
+                ->subject('New Application: ' . $application->getJobOffer()->getTitle())
+                ->text('A new application has been received for the job offer: ' . $application->getJobOffer()->getTitle());
 
-        // $this->mailer->send($email);
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // Log but don't crash if email fails
+            error_log('Failed to send application notification email: ' . $e->getMessage());
+        }
     }
 
     public function updateApplicationStatus(Application $application, string $status): void
@@ -99,14 +103,18 @@ class ApplicationService
 
     private function sendApplicationStatusEmail(Application $application): void
     {
-        // TODO: Implement email sending logic
-        $email = (new Email())
-            ->from('no-reply@jobsinternships.com')
-            ->to($application->getCandidate()->getEmail())
-            ->subject('Application Status: ' . ucfirst(strtolower($application->getStatus())))
-            ->text('Your application status has been updated');
+        try {
+            $email = (new Email())
+                ->from('no-reply@jobsinternships.com')
+                ->to($application->getCandidate()->getEmail())
+                ->subject('Application Status: ' . ucfirst(strtolower($application->getStatus())))
+                ->text('Your application status for ' . $application->getJobOffer()->getTitle() . ' has been updated to: ' . $application->getStatus());
 
-        // $this->mailer->send($email);
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // Log but don't crash if email fails
+            error_log('Failed to send application status email: ' . $e->getMessage());
+        }
     }
 }
 

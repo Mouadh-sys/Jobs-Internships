@@ -53,31 +53,39 @@ class CompanyApprovalService
 
     private function sendApprovalEmail(Company $company): void
     {
-        // TODO: Implement email sending logic
-        $email = (new Email())
-            ->from('no-reply@jobsinternships.com')
-            ->to($company->getUser()->getEmail())
-            ->subject('Your Company Has Been Approved')
-            ->text('Your company account has been approved');
+        try {
+            $email = (new Email())
+                ->from('no-reply@jobsinternships.com')
+                ->to($company->getUser()->getEmail())
+                ->subject('Your Company Has Been Approved')
+                ->text('Your company account has been approved and is now active.');
 
-        // $this->mailer->send($email);
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // Log but don't crash if email fails
+            error_log('Failed to send approval email to ' . $company->getUser()->getEmail() . ': ' . $e->getMessage());
+        }
     }
 
     private function sendRejectionEmail(Company $company, string $reason = ''): void
     {
-        // TODO: Implement email sending logic
-        $message = 'Your company account has been rejected';
-        if ($reason) {
-            $message .= '. Reason: ' . $reason;
+        try {
+            $message = 'Your company account has been rejected';
+            if ($reason) {
+                $message .= '. Reason: ' . $reason;
+            }
+
+            $email = (new Email())
+                ->from('no-reply@jobsinternships.com')
+                ->to($company->getUser()->getEmail())
+                ->subject('Your Company Account Has Been Rejected')
+                ->text($message);
+
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // Log but don't crash if email fails
+            error_log('Failed to send rejection email to ' . $company->getUser()->getEmail() . ': ' . $e->getMessage());
         }
-
-        $email = (new Email())
-            ->from('no-reply@jobsinternships.com')
-            ->to($company->getUser()->getEmail())
-            ->subject('Your Company Account Has Been Rejected')
-            ->text($message);
-
-        // $this->mailer->send($email);
     }
 }
 

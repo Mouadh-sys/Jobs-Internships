@@ -28,9 +28,11 @@
             <td>
                 <a href="{{ path('admin_company_show', {id: company.id}) }}" class="btn btn-primary">View</a>
                 <form method="post" action="{{ path('admin_company_approve', {id: company.id}) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_company_approve') }}">
                     <button type="submit" class="btn btn-success">Approve</button>
                 </form>
                 <form method="post" action="{{ path('admin_company_reject', {id: company.id}) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_company_reject') }}">
                     <input type="text" name="reason" placeholder="Rejection reason" style="padding: 0.25rem;">
                     <button type="submit" class="btn btn-danger">Reject</button>
                 </form>

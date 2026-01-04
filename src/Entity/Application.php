@@ -18,6 +18,7 @@ class Application
     final public const STATUS_PENDING = 'PENDING';
     final public const STATUS_ACCEPTED = 'ACCEPTED';
     final public const STATUS_REJECTED = 'REJECTED';
+    final public const STATUS_WITHDRAWN = 'WITHDRAWN';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -115,7 +116,7 @@ class Application
 
     public function setStatus(string $status): static
     {
-        if (!in_array($status, [self::STATUS_PENDING, self::STATUS_ACCEPTED, self::STATUS_REJECTED], true)) {
+        if (!in_array($status, [self::STATUS_PENDING, self::STATUS_ACCEPTED, self::STATUS_REJECTED, self::STATUS_WITHDRAWN], true)) {
             throw new \InvalidArgumentException('Invalid application status');
         }
         $this->status = $status;
@@ -160,6 +161,11 @@ class Application
     public function isRejected(): bool
     {
         return $this->status === self::STATUS_REJECTED;
+    }
+
+    public function isWithdrawn(): bool
+    {
+        return $this->status === self::STATUS_WITHDRAWN;
     }
 }
 

@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Applications{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h2>My Applications</h2>
+
+    {% if applications|length > 0 %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Job Offer</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Applied At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for application in applications %}
+            <tr>
+                <td>{{ application.jobOffer.title }}</td>
+                <td>{{ application.jobOffer.company.name }}</td>
+                <td>
+                    <span class="badge badge-{{ application.status|lower }}">
+                        {{ application.status }}
+                    </span>
+                </td>
+                <td>{{ application.createdAt|date('Y-m-d H:i') }}</td>
+                <td>
+                    <a href="{{ path('candidate_application_show', {id: application.id}) }}" class="btn btn-primary btn-sm">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>You have not applied to any job offers yet.</p>
+    <a href="{{ path('candidate_offers_browse') }}" class="btn btn-primary">Browse Job Offers</a>
+    {% endif %}
+</div>
+{% endblock %}
+

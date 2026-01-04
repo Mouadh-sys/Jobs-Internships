@@ -21,19 +21,24 @@ class ApplicationController extends AbstractController
     #[Route('', name: 'candidate_applications_list', methods: ['GET'])]
     public function list(ApplicationRepository $applicationRepository): Response
     {
-        // TODO: List candidate applications with status
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $applications = $applicationRepository->findForCandidate($user);
 
         return $this->render('candidate/applications/list.html.twig', [
-            // TODO: Pass applications
+            'applications' => $applications,
         ]);
     }
 
     #[Route('/{id}', name: 'candidate_application_show', methods: ['GET'])]
     public function show(Application $application): Response
     {
-        // TODO: Show application details
-        // - Display job offer info
-        // - Display application status and message
+        // Verify ownership
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        if ($application->getCandidate() !== $user) {
+            throw $this->createAccessDeniedException('You can only view your own applications.');
+        }
 
         return $this->render('candidate/applications/show.html.twig', [
             'application' => $application,
@@ -46,14 +51,33 @@ class ApplicationController extends AbstractController
         JobOffer $jobOffer,
         ApplicationService $applicationService,
     ): Response {
-        // TODO: Apply to job offer
-        // - Show ApplicationType form
-        // - Handle file upload
-        // - Create application record
+        $form = $this->createForm(ApplicationType::class, new Application());
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                /** @var \App\Entity\User $user */
+                $user = $this->getUser();
+                $message = $form->get('message')->getData() ?? '';
+                $cv = $form->get('cvFilename')->getData();
+
+                $application = $applicationService->applyToOffer(
+                    $user,
+                    $jobOffer,
+                    $message,
+                    $cv,
+                );
+
+                $this->addFlash('success', 'Your application has been submitted successfully.');
+                return $this->redirectToRoute('candidate_application_show', ['id' => $application->getId()]);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Error: ' . $e->getMessage());
+            }
+        }
 
         return $this->render('candidate/applications/apply.html.twig', [
             'offer' => $jobOffer,
-            // TODO: Pass form
+            'form' => $form,
         ]);
     }
 
@@ -62,8 +86,28 @@ class ApplicationController extends AbstractController
         Application $application,
         EntityManagerInterface $entityManager,
     ): Response {
-        // TODO: Withdraw application
+        // Verify that the logged-in candidate owns this application
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        if ($application->getCandidate() !== $user) {
+            $this->addFlash('error', 'You can only withdraw your own applications.');
+            return $this->redirectToRoute('candidate_applications_list');
+        }
 
+        // Prevent withdrawal if already accepted or rejected
+        if ($application->isAccepted() || $application->isRejected()) {
+            $this->addFlash('error', 'You cannot withdraw an application that has already been ' . strtolower($application->getStatus()) . '.');
+            return $this->redirectToRoute('candidate_application_show', ['id' => $application->getId()]);
+        }
+
+        // Mark application as withdrawn
+        $application->setStatus(Application::STATUS_WITHDRAWN);
+        $application->setUpdatedAt(new \DateTimeImmutable());
+
+        $entityManager->persist($application);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Application withdrawn successfully.');
         return $this->redirectToRoute('candidate_applications_list');
     }
 }

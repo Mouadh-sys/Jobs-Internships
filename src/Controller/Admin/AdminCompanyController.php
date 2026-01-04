@@ -67,10 +67,11 @@ class AdminCompanyController extends AbstractController
         Company $company,
         CompanyApprovalService $approvalService,
     ): Response {
-        // TODO: Approve company
-        // - Use CompanyApprovalService
-        // - Send approval email
+        /** @var \App\Entity\User $admin */
+        $admin = $this->getUser();
+        $approvalService->approve($company, $admin);
 
+        $this->addFlash('success', 'Company approved successfully.');
         return $this->redirectToRoute('admin_companies_pending');
     }
 
@@ -80,18 +81,23 @@ class AdminCompanyController extends AbstractController
         Request $request,
         CompanyApprovalService $approvalService,
     ): Response {
-        // TODO: Reject company
-        // - Use CompanyApprovalService
-        // - Include rejection reason
+        /** @var \App\Entity\User $admin */
+        $admin = $this->getUser();
+        $reason = $request->request->get('reason', '');
 
+        $approvalService->reject($company, $admin, $reason);
+
+        $this->addFlash('success', 'Company rejected successfully.');
         return $this->redirectToRoute('admin_companies_pending');
     }
 
     #[Route('/{id}/delete', name: 'admin_company_delete', methods: ['POST'])]
     public function delete(Company $company, EntityManagerInterface $entityManager): Response
     {
-        // TODO: Delete company and related data
+        $entityManager->remove($company);
+        $entityManager->flush();
 
+        $this->addFlash('success', 'Company deleted successfully.');
         return $this->redirectToRoute('admin_companies_list');
     }
 }
