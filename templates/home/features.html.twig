@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Features - Jobs & Internships{% endblock %}
+
+{% block body %}
+<div class="d-flex flex-column min-vh-100">
+    <!-- Navigation -->
+    {% include 'components/navbar.html.twig' %}
+
+    <!-- Header -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">Our Features</h1>
+            <p class="lead text-muted">Discover everything our platform offers to help you succeed</p>
+        </div>
+    </section>
+
+    <!-- Features Details -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4">
+                <!-- For Candidates -->
+                <div class="col-md-6 mb-5">
+                    <div class="mb-4">
+                        <h3 class="display-6 fw-bold mb-3">
+                            <i class="fas fa-users text-primary me-2"></i>For Candidates
+                        </h3>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-search text-primary me-2"></i>Advanced Job Search
+                        </h5>
+                        <p class="text-muted">Search through thousands of opportunities filtered by location, industry, experience level, and more.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-bookmark text-success me-2"></i>Save Your Favorites
+                        </h5>
+                        <p class="text-muted">Bookmark positions you're interested in and access them anytime. Never lose track of your perfect job.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-paper-plane text-info me-2"></i>Easy Application
+                        </h5>
+                        <p class="text-muted">Apply to positions with just a few clicks. Track all your applications and their status in one place.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-user-circle text-warning me-2"></i>Professional Profile
+                        </h5>
+                        <p class="text-muted">Build a comprehensive candidate profile showcasing your skills, experience, and achievements to employers.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-bell text-danger me-2"></i>Job Alerts
+                        </h5>
+                        <p class="text-muted">Receive notifications for new positions matching your preferences so you never miss an opportunity.</p>
+                    </div>
+                </div>
+
+                <!-- For Companies -->
+                <div class="col-md-6 mb-5">
+                    <div class="mb-4">
+                        <h3 class="display-6 fw-bold mb-3">
+                            <i class="fas fa-building text-success me-2"></i>For Companies
+                        </h3>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-plus-circle text-primary me-2"></i>Post Job Openings
+                        </h5>
+                        <p class="text-muted">Create and manage job listings with detailed descriptions, requirements, and benefits to attract top talent.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-users-check text-success me-2"></i>Manage Applications
+                        </h5>
+                        <p class="text-muted">Review all applications in one centralized dashboard. Track candidate progress and make informed hiring decisions.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-briefcase text-info me-2"></i>Company Profile
+                        </h5>
+                        <p class="text-muted">Showcase your company culture, values, and team. Build your employer brand and attract quality candidates.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-chart-bar text-warning me-2"></i>Analytics & Insights
+                        </h5>
+                        <p class="text-muted">Track job posting performance, application rates, and candidate engagement with detailed analytics.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-lock text-danger me-2"></i>Security & Verification
+                        </h5>
+                        <p class="text-muted">All companies are verified to ensure they're legitimate. Candidates can apply with confidence.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="bg-gradient text-white py-5 mt-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container text-center">
+            <h2 class="display-5 fw-bold mb-4">Start Using Our Platform Today</h2>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ path('app_register') }}" class="btn btn-light btn-lg px-5">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </a>
+                <a href="{{ path('login') }}" class="btn btn-outline-light btn-lg px-5">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4 mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-briefcase me-2"></i>Jobs & Internships
+                    </h6>
+                    <p class="small text-muted">Your gateway to career opportunities</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{{ path('app_home') }}" class="text-muted text-decoration-none">Home</a></li>
+                        <li><a href="{{ path('app_features') }}" class="text-muted text-decoration-none">Features</a></li>
+                        <li><a href="{{ path('login') }}" class="text-muted text-decoration-none">Login</a></li>
+                        <li><a href="{{ path('app_register') }}" class="text-muted text-decoration-none">Register</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold mb-3">Contact</h6>
+                    <p class="small text-muted">
+                        Email: info@jobsinternships.com<br>
+                        Phone: +1 (555) 000-0000
+                    </p>
+                </div>
+            </div>
+            <hr class="bg-secondary">
+            <div class="text-center">
+                <p class="small text-muted mb-0">&copy; 2026 Jobs & Internships. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    }
+
+    .min-vh-100 {
+        min-height: 100vh;
+    }
+</style>
+{% endblock %}
+

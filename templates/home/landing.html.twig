@@ -1,0 +1,230 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Jobs & Internships - Find Your Perfect Opportunity{% endblock %}
+
+{% block body %}
+<div class="d-flex flex-column min-vh-100">
+    <!-- Navigation -->
+    {% include 'components/navbar.html.twig' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section bg-gradient text-white py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 600px; display: flex; align-items: center;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Find Your Dream Job or Internship
+                    </h1>
+                    <p class="lead mb-4">
+                        Connect with top companies and discover amazing career opportunities tailored to your skills and interests.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="{{ path('login') }}" class="btn btn-light btn-lg px-5">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </a>
+                        <a href="{{ path('app_register') }}" class="btn btn-outline-light btn-lg px-5">
+                            <i class="fas fa-user-plus me-2"></i>Register Now
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="fas fa-briefcase" style="font-size: 200px; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">Why Choose Us?</h2>
+                <p class="lead text-muted">Everything you need for your career journey</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- For Candidates -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-search text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Discover Opportunities</h5>
+                        <p class="card-text text-muted">Browse thousands of job openings and internship positions from verified companies.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-bookmark text-success" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Save for Later</h5>
+                        <p class="card-text text-muted">Bookmark your favorite positions and come back to them whenever you're ready to apply.</p>
+                    </div>
+                </div>
+
+                <!-- For Companies -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-users text-info" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Find Top Talent</h5>
+                        <p class="card-text text-muted">Post job openings and receive applications from qualified candidates across your field.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line text-warning" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Grow Your Business</h5>
+                        <p class="card-text text-muted">Build your company profile and manage applications with our easy-to-use platform.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Get started in just a few simple steps</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            1
+                        </div>
+                        <h5 class="fw-bold mb-3">Create Your Account</h5>
+                        <p class="text-muted">Sign up as a candidate or company in just minutes. Verify your email and set up your profile.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            2
+                        </div>
+                        <h5 class="fw-bold mb-3">Browse & Apply</h5>
+                        <p class="text-muted">For candidates: Find jobs that match your skills. For companies: Post your positions.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            3
+                        </div>
+                        <h5 class="fw-bold mb-3">Land Your Dream</h5>
+                        <p class="text-muted">Connect with the right opportunities. Manage applications and build your career.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section bg-gradient text-white py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container text-center">
+            <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+            <p class="lead mb-4">Join thousands of candidates and companies already using our platform</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ path('app_register') }}" class="btn btn-light btn-lg px-5">
+                    <i class="fas fa-user-plus me-2"></i>Sign Up as Candidate
+                </a>
+                <a href="{{ path('app_register') }}" class="btn btn-outline-light btn-lg px-5">
+                    <i class="fas fa-building me-2"></i>Sign Up as Company
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4 mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-briefcase me-2"></i>Jobs & Internships
+                    </h6>
+                    <p class="small text-muted">Your gateway to career opportunities</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{{ path('app_home') }}" class="text-muted text-decoration-none">Home</a></li>
+                        <li><a href="{{ path('app_features') }}" class="text-muted text-decoration-none">Features</a></li>
+                        <li><a href="{{ path('login') }}" class="text-muted text-decoration-none">Login</a></li>
+                        <li><a href="{{ path('app_register') }}" class="text-muted text-decoration-none">Register</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold mb-3">Contact</h6>
+                    <p class="small text-muted">
+                        Email: info@jobsinternships.com<br>
+                        Phone: +1 (555) 000-0000
+                    </p>
+                </div>
+            </div>
+            <hr class="bg-secondary">
+            <div class="text-center">
+                <p class="small text-muted mb-0">&copy; 2026 Jobs & Internships. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    }
+
+    .hero-section {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,50 Q300,0 600,50 T1200,50 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.1)"></path></svg>') no-repeat center bottom;
+        background-size: cover;
+    }
+
+    .hero-section .row {
+        position: relative;
+        z-index: 1;
+    }
+
+    .features-section {
+        min-height: 400px;
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .min-vh-100 {
+        min-height: 100vh;
+    }
+</style>
+{% endblock %}
+

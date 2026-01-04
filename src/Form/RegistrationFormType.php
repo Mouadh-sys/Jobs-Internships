@@ -13,15 +13,15 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class CompanyRegistrationFormType extends AbstractType
+class RegistrationFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('companyName', TextType::class, [
-                'mapped' => false, // Set to true if User entity has this field
+                'mapped' => false,
                 'label' => 'Company Name',
-                'constraints' => [new Assert\NotBlank(['message' => 'Please enter your company name'])],
+                'constraints' => [new Assert\NotBlank(message: 'Please enter your company name')],
             ])
             ->add('fullName', TextType::class, [
                 'label' => 'Contact Person Name',
@@ -38,12 +38,12 @@ class CompanyRegistrationFormType extends AbstractType
                 'invalid_message' => 'The password fields must match.',
                 'constraints' => [
                     new Assert\NotBlank(),
-                    new Assert\Length(['min' => 8, 'minMessage' => 'Security: Min 8 characters']),
+                    new Assert\Length(min: 8, minMessage: 'Security: Min 8 characters'),
                 ],
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
-                'constraints' => [new Assert\IsTrue(['message' => 'You must agree to our terms.'])],
+                'constraints' => [new Assert\IsTrue(message: 'You must agree to our terms.')],
             ]);
     }
 

@@ -1,0 +1,91 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ path('app_home') }}">
+            <i class="fas fa-briefcase me-2"></i>Jobs & Internships
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% if app.user %}
+                    <!-- Authenticated User Navigation -->
+                    {% if is_granted('ROLE_COMPANY') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('company_profile_show') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('company_offers_list') }}">
+                                <i class="fas fa-briefcase me-1"></i>My Offers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('company_applications_list') }}">
+                                <i class="fas fa-inbox me-1"></i>Applications
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_offers_index') }}">
+                                <i class="fas fa-search me-1"></i>Browse Jobs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('candidate_applications_list') }}">
+                                <i class="fas fa-file-alt me-1"></i>My Applications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('candidate_saved_offers_list') }}">
+                                <i class="fas fa-bookmark me-1"></i>Saved Jobs
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('admin_offers_list') }}">
+                                <i class="fas fa-shield-alt me-1"></i>Admin
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>{{ app.user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            {% if is_granted('ROLE_COMPANY') %}
+                                <li><a class="dropdown-item" href="{{ path('company_profile_show') }}"><i class="fas fa-edit me-2"></i>Edit Profile</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{{ path('candidate_profile_show') }}"><i class="fas fa-edit me-2"></i>Edit Profile</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <!-- Unauthenticated User Navigation -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_features') }}">
+                            <i class="fas fa-star me-1"></i>Features
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('login') }}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-primary text-white ms-2 px-3" href="{{ path('app_register') }}">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
