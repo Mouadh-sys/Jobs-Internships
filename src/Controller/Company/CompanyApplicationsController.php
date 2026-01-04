@@ -131,7 +131,7 @@ class CompanyApplicationsController extends AbstractController
             return $this->redirectToRoute('company_application_show', ['id' => $application->getId()]);
         }
 
-        $cvPath = $this->getParameter('kernel.project_dir') . '/public/uploads/cvs/' . $application->getCvFilename();
+        $cvPath = $this->getParameter('cv_directory') . '/' . $application->getCvFilename();
 
         if (!file_exists($cvPath)) {
             $this->addFlash('error', 'CV file not found.');

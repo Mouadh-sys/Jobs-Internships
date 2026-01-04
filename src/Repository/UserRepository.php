@@ -55,10 +55,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function findAdmins(): array
     {
-        // Use JSON_CONTAINS with proper JSON string format for array values
+        // Use JSON_CONTAINS with JSON-encoded role value
         return $this->createQueryBuilder('u')
-            ->where("JSON_CONTAINS(u.roles, JSON_QUOTE(:role)) = 1")
-            ->setParameter('role', 'ROLE_ADMIN')
+            ->where("JSON_CONTAINS(u.roles, :role) = 1")
+            ->setParameter('role', json_encode('ROLE_ADMIN'))
             ->orderBy('u.createdAt', 'DESC')
             ->getQuery()
             ->getResult();

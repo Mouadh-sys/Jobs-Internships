@@ -4,14 +4,13 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <script src="https://cdn.tailwindcss.com"></script>
 {% endblock %}
 
 {% block body %}
 <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Register your company/recruitment agency
+            Create Your Account
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600">
             Or
@@ -47,9 +46,19 @@
                 {% endfor %}
 
                 <div>
+                    {{ form_label(registrationForm.accountType, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                    <div class="flex gap-4">
+                        {{ form_widget(registrationForm.accountType) }}
+                    </div>
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form_errors(registrationForm.accountType) }}
+                    </div>
+                </div>
+
+                <div id="company-name-field" style="display: none;">
                     {{ form_label(registrationForm.companyName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
                     <div class="mt-1">
-                        {{ form_widget(registrationForm.companyName) }}
+                        {{ form_widget(registrationForm.companyName, {'attr': {'class': 'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'}}) }}
                     </div>
                     <div class="mt-1 text-sm text-red-600">
                         {{ form_errors(registrationForm.companyName) }}
@@ -111,4 +120,29 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const accountTypeInputs = document.querySelectorAll('input[name="registration_form[accountType]"]');
+    const companyNameField = document.getElementById('company-name-field');
+    
+    function toggleCompanyField() {
+        const selectedType = document.querySelector('input[name="registration_form[accountType]"]:checked');
+        if (selectedType && selectedType.value === 'company') {
+            companyNameField.style.display = 'block';
+            companyNameField.querySelector('input').required = true;
+        } else {
+            companyNameField.style.display = 'none';
+            companyNameField.querySelector('input').required = false;
+        }
+    }
+    
+    accountTypeInputs.forEach(input => {
+        input.addEventListener('change', toggleCompanyField);
+    });
+    
+    // Initial state
+    toggleCompanyField();
+});
+</script>
 {% endblock %}

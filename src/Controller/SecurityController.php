@@ -28,10 +28,4 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route('/logout', name: 'logout', methods: ['GET'])]
-    public function logout(): void
-    {
-        // Logic from Code 1: Explicitly defining the method is cleaner
-        throw new \LogicException('This should never be reached.');
-    }
 }

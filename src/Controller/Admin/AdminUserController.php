@@ -25,19 +25,28 @@ class AdminUserController extends AbstractController
         $offset = ($page - 1) * $limit;
         $role = $request->query->get('role', '');
 
-        // Get all users or filter by role
-        $allUsers = $userRepository->findAll();
+        // Use query builder for filtering and pagination
+        $qb = $userRepository->createQueryBuilder('u')
+            ->orderBy('u.createdAt', 'DESC');
 
         if ($role === 'admin') {
-            $allUsers = array_filter($allUsers, fn($u) => in_array('ROLE_ADMIN', $u->getRoles()));
+            $qb->where("JSON_CONTAINS(u.roles, :role) = 1")
+                ->setParameter('role', json_encode('ROLE_ADMIN'));
         } elseif ($role === 'company') {
-            $allUsers = array_filter($allUsers, fn($u) => $u->getCompany() !== null);
+            $qb->where('u.company IS NOT NULL');
         } elseif ($role === 'candidate') {
-            $allUsers = array_filter($allUsers, fn($u) => $u->getCompany() === null && !in_array('ROLE_ADMIN', $u->getRoles()));
+            $qb->leftJoin('App\Entity\Company', 'c', 'WITH', 'c.user = u')
+                ->where('c.id IS NULL')
+                ->andWhere("u.roles NOT LIKE '%ROLE_ADMIN%'");
         }
 
-        $totalUsers = count($allUsers);
-        $users = array_slice($allUsers, $offset, $limit);
+        $query = $qb->getQuery();
+        $query->setFirstResult($offset)->setMaxResults($limit);
+        
+        $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
+        $totalUsers = count($paginator);
+        $users = iterator_to_array($paginator);
+        
         $totalPages = ceil($totalUsers / $limit);
 
         return $this->render('admin/users/list.html.twig', [

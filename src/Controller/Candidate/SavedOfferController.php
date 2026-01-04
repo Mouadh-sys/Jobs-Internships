@@ -7,6 +7,7 @@ use App\Entity\SavedOffer;
 use App\Repository\SavedOfferRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -31,7 +32,14 @@ class SavedOfferController extends AbstractController
         JobOffer $jobOffer,
         EntityManagerInterface $entityManager,
         SavedOfferRepository $savedOfferRepository,
+        Request $request,
     ): Response {
+        // CSRF validation
+        $tokenId = 'save_offer_' . $jobOffer->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid security token.');
+        }
+
         $user = $this->getUser();
 
         // Check if already saved
@@ -58,7 +66,14 @@ class SavedOfferController extends AbstractController
     public function unsaveOffer(
         SavedOffer $savedOffer,
         EntityManagerInterface $entityManager,
+        Request $request,
     ): Response {
+        // CSRF validation
+        $tokenId = 'unsave_saved_offer_' . $savedOffer->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid security token.');
+        }
+
         $user = $this->getUser();
 
         // Verify ownership

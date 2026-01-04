@@ -33,6 +33,9 @@
     {% endif %}
 
     <a href="{{ path('candidate_profile_edit') }}" class="btn">Edit Profile</a>
-    <a href="{{ path('logout') }}" class="btn">Logout</a>
+    <form method="post" action="{{ path('logout') }}" style="display: inline;">
+        <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
+        <button type="submit" class="btn">Logout</button>
+    </form>
 {% endblock %}
 

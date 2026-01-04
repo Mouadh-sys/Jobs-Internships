@@ -25,25 +25,31 @@ class AdminCompanyController extends AbstractController
         $offset = ($page - 1) * $limit;
         $status = $request->query->get('status', '');
 
-        // Get all companies
-        $allCompanies = $companyRepository->findAll();
-        $totalCompanies = count($allCompanies);
+        // Use query builder for filtering and pagination
+        $qb = $companyRepository->createQueryBuilder('c')
+            ->orderBy('c.createdAt', 'DESC');
 
-        // Simple filtering by status
-        $filteredCompanies = $allCompanies;
         if ($status === 'approved') {
-            $filteredCompanies = array_filter($allCompanies, fn($c) => $c->isApproved());
+            $qb->where('c.isApproved = :approved')
+                ->setParameter('approved', true);
         } elseif ($status === 'pending') {
-            $filteredCompanies = array_filter($allCompanies, fn($c) => !$c->isApproved());
+            $qb->where('c.isApproved = :approved')
+                ->setParameter('approved', false);
         } elseif ($status === 'active') {
-            $filteredCompanies = array_filter($allCompanies, fn($c) => $c->isActive());
+            $qb->where('c.isActive = :active')
+                ->setParameter('active', true);
         } elseif ($status === 'inactive') {
-            $filteredCompanies = array_filter($allCompanies, fn($c) => !$c->isActive());
+            $qb->where('c.isActive = :active')
+                ->setParameter('active', false);
         }
 
-        // Apply pagination
-        $companies = array_slice($filteredCompanies, $offset, $limit);
-        $totalFiltered = count($filteredCompanies);
+        $query = $qb->getQuery();
+        $query->setFirstResult($offset)->setMaxResults($limit);
+        
+        $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
+        $totalFiltered = count($paginator);
+        $companies = iterator_to_array($paginator);
+        
         $totalPages = ceil($totalFiltered / $limit);
 
         return $this->render('admin/companies/list.html.twig', [

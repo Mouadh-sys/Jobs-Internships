@@ -24,12 +24,17 @@ class AdminOfferController extends AbstractController
         $limit = 10;
         $offset = ($page - 1) * $limit;
 
-        // Get all offers
-        $allOffers = $jobOfferRepository->findAll();
-        $totalOffers = count($allOffers);
-
-        // Apply pagination
-        $offers = array_slice($allOffers, $offset, $limit);
+        // Use query builder for pagination
+        $qb = $jobOfferRepository->createQueryBuilder('j')
+            ->orderBy('j.createdAt', 'DESC');
+        
+        $query = $qb->getQuery();
+        $query->setFirstResult($offset)->setMaxResults($limit);
+        
+        $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
+        $totalOffers = count($paginator);
+        $offers = iterator_to_array($paginator);
+        
         $totalPages = ceil($totalOffers / $limit);
 
         return $this->render('admin/offers/list.html.twig', [

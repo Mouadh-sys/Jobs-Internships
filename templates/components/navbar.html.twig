@@ -54,7 +54,7 @@
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle me-1"></i>{{ app.user.username }}
+                            <i class="fas fa-user-circle me-1"></i>{{ app.user.fullName }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             {% if is_granted('ROLE_COMPANY') %}
@@ -63,7 +63,14 @@
                                 <li><a class="dropdown-item" href="{{ path('candidate_profile_show') }}"><i class="fas fa-edit me-2"></i>Edit Profile</a></li>
                             {% endif %}
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                            <li>
+                                <form method="post" action="{{ path('logout') }}" style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
+                                    <button type="submit" class="dropdown-item text-danger" style="border: none; background: none; width: 100%; text-align: left; padding: 0.25rem 1.5rem;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                                    </button>
+                                </form>
+                            </li>
                         </ul>
                     </li>
                 {% else %}

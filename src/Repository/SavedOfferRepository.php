@@ -31,9 +31,9 @@ class SavedOfferRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('s')
             ->where('s.user = :user')
-            ->andWhere('s.jobOffer = :jobOffer')
+            ->andWhere('IDENTITY(s.jobOffer) = :jobOfferId')
             ->setParameter('user', $user)
-            ->setParameter('jobOffer', $jobOfferId)
+            ->setParameter('jobOfferId', $jobOfferId)
             ->getQuery()
             ->getOneOrNullResult();
     }

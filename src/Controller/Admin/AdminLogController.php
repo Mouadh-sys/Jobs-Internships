@@ -29,8 +29,8 @@ class AdminLogController extends AbstractController
             ->orderBy('l.createdAt', 'DESC');
 
         if ($filters['admin'] > 0) {
-            $qb->andWhere('l.admin = :admin')
-                ->setParameter('admin', $filters['admin']);
+            $qb->andWhere('IDENTITY(l.admin) = :adminId')
+                ->setParameter('adminId', $filters['admin']);
         }
 
         if (!empty($filters['entity_type'])) {
@@ -91,8 +91,8 @@ class AdminLogController extends AbstractController
             ->orderBy('l.createdAt', 'DESC');
 
         if ($filters['admin'] > 0) {
-            $qb->andWhere('l.admin = :admin')
-                ->setParameter('admin', $filters['admin']);
+            $qb->andWhere('IDENTITY(l.admin) = :adminId')
+                ->setParameter('adminId', $filters['admin']);
         }
 
         if (!empty($filters['entity_type'])) {

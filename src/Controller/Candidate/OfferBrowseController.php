@@ -8,6 +8,7 @@ use App\Repository\JobOfferRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\SavedOfferRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +22,8 @@ class OfferBrowseController extends AbstractController
      * Uses Code 2's logic for filtering and pagination
      */
     #[Route('/', name: 'app_offers_index', methods: ['GET'])]
+    #[Route('/', name: 'candidate_offers_list', methods: ['GET'])]
+    #[Route('/', name: 'candidate_offers_browse', methods: ['GET'])]
     public function index(
         Request $request,
         JobOfferRepository $jobOfferRepository,
@@ -61,8 +64,11 @@ class OfferBrowseController extends AbstractController
      * Logic from Code 1: Includes isSaved check
      */
     #[Route('/{slug}', name: 'candidate_offer_detail', methods: ['GET'])]
-    public function detail(JobOffer $jobOffer, SavedOfferRepository $savedOfferRepository): Response
-    {
+    public function detail(
+        #[MapEntity(mapping: ['slug' => 'slug'])]
+        JobOffer $jobOffer,
+        SavedOfferRepository $savedOfferRepository
+    ): Response {
         $user = $this->getUser();
         $isSaved = false;
 
@@ -71,7 +77,7 @@ class OfferBrowseController extends AbstractController
             $isSaved = $savedOffer !== null;
         }
 
-        return $this->render('candidate/offer/detail.html.twig', [
+        return $this->render('candidate/offers/detail.html.twig', [
             'offer' => $jobOffer,
             'isSaved' => $isSaved,
         ]);
@@ -82,8 +88,14 @@ class OfferBrowseController extends AbstractController
      */
     #[Route('/{id}/save', name: 'candidate_offer_save', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function save(JobOffer $jobOffer, EntityManagerInterface $entityManager, SavedOfferRepository $savedOfferRepository): Response
+    public function save(JobOffer $jobOffer, EntityManagerInterface $entityManager, SavedOfferRepository $savedOfferRepository, Request $request): Response
     {
+        // CSRF validation
+        $tokenId = 'save_offer_' . $jobOffer->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid security token.');
+        }
+
         $user = $this->getUser();
 
         if ($savedOfferRepository->findByUserAndJobOffer($user, $jobOffer->getId())) {
@@ -105,8 +117,14 @@ class OfferBrowseController extends AbstractController
      */
     #[Route('/{id}/unsave', name: 'candidate_offer_unsave', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function unsave(JobOffer $jobOffer, EntityManagerInterface $entityManager, SavedOfferRepository $savedOfferRepository): Response
+    public function unsave(JobOffer $jobOffer, EntityManagerInterface $entityManager, SavedOfferRepository $savedOfferRepository, Request $request): Response
     {
+        // CSRF validation
+        $tokenId = 'unsave_offer_' . $jobOffer->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid security token.');
+        }
+
         $savedOffer = $savedOfferRepository->findByUserAndJobOffer($this->getUser(), $jobOffer->getId());
 
         if ($savedOffer) {

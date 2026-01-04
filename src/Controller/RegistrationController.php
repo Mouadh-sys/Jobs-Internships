@@ -25,7 +25,10 @@ class RegistrationController extends AbstractController
     ): Response {
         if ($this->getUser()) {
             $this->addFlash('warning', 'You are already logged in. Please logout to register a new account.');
-            return $this->redirectToRoute('company_profile_show');
+            if ($this->isGranted('ROLE_COMPANY')) {
+                return $this->redirectToRoute('company_profile_show');
+            }
+            return $this->redirectToRoute('candidate_profile_show');
         }
 
         $user = new User();
@@ -33,6 +36,17 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $accountType = $form->get('accountType')->getData();
+            $companyName = $form->get('companyName')->getData();
+
+            // Validate company name if account type is company
+            if ($accountType === 'company' && empty($companyName)) {
+                $form->get('companyName')->addError(new \Symfony\Component\Form\FormError('Company name is required for company accounts.'));
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form->createView(),
+                ]);
+            }
+
             // 1. Create User
             $user->setPassword(
                 $userPasswordHasher->hashPassword(
@@ -40,26 +54,40 @@ class RegistrationController extends AbstractController
                     $form->get('plainPassword')->getData()
                 )
             );
-            $user->setRoles(['ROLE_COMPANY']);
 
-            $entityManager->persist($user);
+            if ($accountType === 'company') {
+                $user->setRoles(['ROLE_COMPANY']);
+                $entityManager->persist($user);
 
-            // 2. Create Company
-            $company = new Company();
-            $company->setUser($user);
-            $company->setName($form->get('companyName')->getData());
-            $company->setApproved(true); // Auto-approve for now
-            // $company->setLocation('To be updated'); // Optional
+                // 2. Create Company (not auto-approved)
+                $company = new Company();
+                $company->setUser($user);
+                $company->setName($companyName);
+                $company->setApproved(false); // Require admin approval
+                $company->setActive(false);
 
-            $entityManager->persist($company);
-            $entityManager->flush();
+                $entityManager->persist($company);
+                $entityManager->flush();
 
-            // 3. Auto-login
-            $security->login($user, 'form_login', 'main');
+                // 3. Auto-login
+                $security->login($user, 'form_login', 'main');
 
-            $this->addFlash('success', 'Welcome! Your company account has been created.');
+                $this->addFlash('success', 'Welcome! Your company account has been created and is pending approval.');
 
-            return $this->redirectToRoute('company_profile_show');
+                return $this->redirectToRoute('company_profile_show');
+            } else {
+                // Candidate registration
+                $user->setRoles(['ROLE_USER']);
+                $entityManager->persist($user);
+                $entityManager->flush();
+
+                // 3. Auto-login
+                $security->login($user, 'form_login', 'main');
+
+                $this->addFlash('success', 'Welcome! Your candidate account has been created.');
+
+                return $this->redirectToRoute('candidate_profile_show');
+            }
         }
 
         return $this->render('registration/register.html.twig', [

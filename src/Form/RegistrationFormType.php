@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -18,13 +19,24 @@ class RegistrationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('accountType', ChoiceType::class, [
+                'mapped' => false,
+                'label' => 'Account Type',
+                'choices' => [
+                    'Candidate' => 'candidate',
+                    'Company' => 'company',
+                ],
+                'expanded' => true,
+                'data' => 'candidate',
+                'constraints' => [new Assert\NotBlank()],
+            ])
             ->add('companyName', TextType::class, [
                 'mapped' => false,
                 'label' => 'Company Name',
-                'constraints' => [new Assert\NotBlank(message: 'Please enter your company name')],
+                'required' => false,
             ])
             ->add('fullName', TextType::class, [
-                'label' => 'Contact Person Name',
+                'label' => 'Full Name',
                 'constraints' => [new Assert\NotBlank()],
             ])
             ->add('email', EmailType::class, [

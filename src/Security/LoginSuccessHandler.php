@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
@@ -12,6 +13,7 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
     public function __construct(
         private RouterInterface $router,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -21,12 +23,18 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 
         if (in_array('ROLE_COMPANY', $roles, true) || in_array('ROLE_ADMIN', $roles, true)) {
             $targetUrl = $this->router->generate('company_profile_show');
-            file_put_contents('login_debug.log', date('Y-m-d H:i:s') . " - User with roles " . implode(',', $roles) . " redirecting to: " . $targetUrl . "\n", FILE_APPEND);
+            $this->logger->debug('Login redirect', [
+                'roles' => $roles,
+                'target_url' => $targetUrl,
+            ]);
             return new RedirectResponse($targetUrl);
         }
 
         $targetUrl = $this->router->generate('app_offers_index');
-        file_put_contents('login_debug.log', date('Y-m-d H:i:s') . " - Redirecting to default: " . $targetUrl . "\n", FILE_APPEND);
+        $this->logger->debug('Login redirect', [
+            'roles' => $roles,
+            'target_url' => $targetUrl,
+        ]);
         return new RedirectResponse($targetUrl);
     }
 }

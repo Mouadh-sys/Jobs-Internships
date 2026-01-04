@@ -33,11 +33,35 @@ cd Jobs-Internships
 composer install
 ```
 
-### 2. Configurer la base de données
-Éditer `.env` et vérifier la `DATABASE_URL` :
+### 2. Configurer l'environnement
+Créez un fichier `.env.local` (ne sera pas commité) pour vos configurations locales :
+
+```bash
+# Copy the base .env file if it doesn't exist
+cp .env .env.local
 ```
-DATABASE_URL="mysql://root:@127.0.0.1:3306/jobs_internships_db?serverVersion=8.0"
+
+Éditez `.env.local` et configurez les variables suivantes :
+
 ```
+# Database configuration
+DATABASE_URL="mysql://username:password@127.0.0.1:3306/jobs_internships_db?serverVersion=8.0"
+
+# Application secret (REQUIRED - generate a random string)
+APP_SECRET=your-random-secret-key-here-generate-with-openssl-rand-hex-32
+```
+
+**Important :**
+- Remplacez `username` et `password` par vos identifiants MySQL
+- Remplacez `jobs_internships_db` par le nom de votre base de données
+- **APP_SECRET est obligatoire** : générez une clé secrète avec :
+  ```bash
+  php -r "echo bin2hex(random_bytes(32));"
+  ```
+  Ou utilisez :
+  ```bash
+  openssl rand -hex 32
+  ```
 
 ### 3. Créer la base de données et les tables
 ```bash
@@ -187,12 +211,14 @@ Chaque contrôleur et service contient des **TODO** indiquant ce qui doit être 
 
 ## 📧 Configuration Email
 
-Pour activer les notifications par email, éditer `.env` :
+Pour activer les notifications par email, éditer `.env.local` :
 ```
 MAILER_DSN=smtp://user:pass@smtp.example.com:587?encryption=tls
 ```
 
 Puis décommenter les appels à `$this->mailer->send()` dans les services.
+
+**Note :** Pour la production, configurez les variables d'environnement sur votre serveur. Ne commitez jamais `.env.local` contenant des secrets réels.
 
 ## 🗄️ Base de Données
 
