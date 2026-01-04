@@ -18,14 +18,33 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminUserController extends AbstractController
 {
     #[Route('', name: 'admin_users_list', methods: ['GET'])]
-    public function list(UserRepository $userRepository): Response
+    public function list(UserRepository $userRepository, Request $request): Response
     {
-        // TODO: List all users with pagination and filters
-        // - Filter by role
-        // - Search by email or name
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $role = $request->query->get('role', '');
+
+        // Get all users or filter by role
+        $allUsers = $userRepository->findAll();
+
+        if ($role === 'admin') {
+            $allUsers = array_filter($allUsers, fn($u) => in_array('ROLE_ADMIN', $u->getRoles()));
+        } elseif ($role === 'company') {
+            $allUsers = array_filter($allUsers, fn($u) => $u->getCompany() !== null);
+        } elseif ($role === 'candidate') {
+            $allUsers = array_filter($allUsers, fn($u) => $u->getCompany() === null && !in_array('ROLE_ADMIN', $u->getRoles()));
+        }
+
+        $totalUsers = count($allUsers);
+        $users = array_slice($allUsers, $offset, $limit);
+        $totalPages = ceil($totalUsers / $limit);
 
         return $this->render('admin/users/list.html.twig', [
-            // TODO: Pass users
+            'users' => $users,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'role' => $role,
         ]);
     }
 
@@ -35,13 +54,23 @@ class AdminUserController extends AbstractController
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
     ): Response {
-        // TODO: Create new user
-        // - Use AdminUserType form
-        // - Hash password
-        // - Send welcome email
-
         $user = new User();
         $form = $this->createForm(AdminUserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hash the password
+            $plainPassword = $form->get('password')->getData();
+            if ($plainPassword) {
+                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            }
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'User created successfully.');
+            return $this->redirectToRoute('admin_user_show', ['id' => $user->getId()]);
+        }
 
         return $this->render('admin/users/form.html.twig', [
             'form' => $form,
@@ -56,28 +85,53 @@ class AdminUserController extends AbstractController
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
     ): Response {
-        // TODO: Edit user
-        // - Use AdminUserType form with edit mode
-        // - Optional password change
+        $form = $this->createForm(AdminUserType::class, $user, ['edit' => true]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hash the password if provided
+            $plainPassword = $form->get('password')->getData();
+            if ($plainPassword) {
+                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            }
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'User updated successfully.');
+            return $this->redirectToRoute('admin_user_show', ['id' => $user->getId()]);
+        }
 
         return $this->render('admin/users/form.html.twig', [
-            // TODO: Pass form
+            'form' => $form,
             'user' => $user,
         ]);
     }
 
     #[Route('/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
-    public function delete(User $user, EntityManagerInterface $entityManager): Response
-    {
-        // TODO: Delete user and related data
+    public function delete(
+        Request $request,
+        User $user,
+        EntityManagerInterface $entityManager
+    ): Response {
+        // Verify CSRF token
+        $tokenId = 'delete' . $user->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('admin_users_list');
+        }
 
+        // Remove user (cascade delete will handle applications and saved offers)
+        $entityManager->remove($user);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'User deleted successfully.');
         return $this->redirectToRoute('admin_users_list');
     }
 
     #[Route('/{id}', name: 'admin_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
-        // TODO: Show user details
 
         return $this->render('admin/users/show.html.twig', [
             'user' => $user,

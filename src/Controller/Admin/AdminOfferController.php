@@ -18,46 +18,71 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminOfferController extends AbstractController
 {
     #[Route('', name: 'admin_offers_list', methods: ['GET'])]
-    public function list(JobOfferRepository $jobOfferRepository): Response
+    public function list(JobOfferRepository $jobOfferRepository, Request $request): Response
     {
-        // TODO: List all job offers with pagination
-        // - Filter by company
-        // - Filter by category
-        // - Filter by status
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        // Get all offers
+        $allOffers = $jobOfferRepository->findAll();
+        $totalOffers = count($allOffers);
+
+        // Apply pagination
+        $offers = array_slice($allOffers, $offset, $limit);
+        $totalPages = ceil($totalOffers / $limit);
 
         return $this->render('admin/offers/list.html.twig', [
-            // TODO: Pass offers
+            'offers' => $offers,
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
     #[Route('/{id}', name: 'admin_offer_show', methods: ['GET'])]
     public function show(JobOffer $jobOffer): Response
     {
-        // TODO: Show job offer details
-
         return $this->render('admin/offers/show.html.twig', [
             'offer' => $jobOffer,
+            'applicationCount' => count($jobOffer->getApplications()),
         ]);
     }
 
     #[Route('/{id}/edit', name: 'admin_offer_edit', methods: ['GET', 'POST'])]
     public function edit(JobOffer $jobOffer, Request $request, EntityManagerInterface $entityManager): Response
     {
-        // TODO: Edit job offer
-        // - Use JobOfferType form
+        $form = $this->createForm(JobOfferType::class, $jobOffer);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $jobOffer->setUpdatedAt(new \DateTimeImmutable());
+            $entityManager->persist($jobOffer);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Job offer updated successfully.');
+            return $this->redirectToRoute('admin_offer_show', ['id' => $jobOffer->getId()]);
+        }
 
         return $this->render('admin/offers/form.html.twig', [
-            // TODO: Pass form
+            'form' => $form,
             'offer' => $jobOffer,
         ]);
     }
 
     #[Route('/{id}/toggle', name: 'admin_offer_toggle', methods: ['POST'])]
     public function toggle(
+        Request $request,
         JobOffer $jobOffer,
         EntityManagerInterface $entityManager,
         AdminLogService $adminLogService
     ): Response {
+        // Verify CSRF token
+        $tokenId = 'toggle' . $jobOffer->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('admin_offers_list');
+        }
+
         $oldStatus = $jobOffer->isActive();
         $jobOffer->setActive(!$oldStatus);
         $jobOffer->setUpdatedAt(new \DateTimeImmutable());
@@ -85,10 +110,22 @@ class AdminOfferController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'admin_offer_delete', methods: ['POST'])]
-    public function delete(JobOffer $jobOffer, EntityManagerInterface $entityManager): Response
-    {
-        // TODO: Delete job offer
+    public function delete(
+        Request $request,
+        JobOffer $jobOffer,
+        EntityManagerInterface $entityManager
+    ): Response {
+        // Verify CSRF token
+        $tokenId = 'delete' . $jobOffer->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('admin_offers_list');
+        }
 
+        $entityManager->remove($jobOffer);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Job offer deleted successfully.');
         return $this->redirectToRoute('admin_offers_list');
     }
 }

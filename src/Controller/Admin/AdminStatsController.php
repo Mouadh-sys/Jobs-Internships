@@ -22,21 +22,36 @@ class AdminStatsController extends AbstractController
         JobOfferRepository $jobOfferRepository,
         ApplicationRepository $applicationRepository,
     ): Response {
-        // TODO: Show admin dashboard with statistics
-        // - Total users count
-        // - Total companies count (approved/pending)
-        // - Total job offers count
-        // - Total applications count
-        // - Applications by status
-        // - Recent activities
+        $allUsers = $userRepository->findAll();
+        $allCompanies = $companyRepository->findAll();
+        $allOffers = $jobOfferRepository->findAll();
+        $allApplications = $applicationRepository->findAll();
+
+        // Count pending companies
+        $pendingCompanies = count(array_filter($allCompanies, fn($c) => !$c->isApproved()));
+
+        // Count applications by status
+        $applicationsByStatus = [
+            'PENDING' => 0,
+            'ACCEPTED' => 0,
+            'REJECTED' => 0,
+            'WITHDRAWN' => 0,
+        ];
+        foreach ($allApplications as $app) {
+            $status = $app->getStatus();
+            if (isset($applicationsByStatus[$status])) {
+                $applicationsByStatus[$status]++;
+            }
+        }
 
         $stats = [
-            'totalUsers' => 0,
-            'totalCompanies' => 0,
-            'approvedCompanies' => 0,
-            'pendingCompanies' => 0,
-            'totalOffers' => 0,
-            'totalApplications' => 0,
+            'totalUsers' => count($allUsers),
+            'totalCompanies' => count($allCompanies),
+            'approvedCompanies' => count(array_filter($allCompanies, fn($c) => $c->isApproved())),
+            'pendingCompanies' => $pendingCompanies,
+            'totalOffers' => count($allOffers),
+            'totalApplications' => count($allApplications),
+            'applicationsByStatus' => $applicationsByStatus,
         ];
 
         return $this->render('admin/stats/dashboard.html.twig', [
@@ -47,30 +62,68 @@ class AdminStatsController extends AbstractController
     #[Route('/users', name: 'admin_stats_users', methods: ['GET'])]
     public function userStats(UserRepository $userRepository): Response
     {
-        // TODO: Show detailed user statistics
+        $allUsers = $userRepository->findAll();
+
+        // Count users by type
+        $admins = array_filter($allUsers, fn($u) => in_array('ROLE_ADMIN', $u->getRoles()));
+        $companies = array_filter($allUsers, fn($u) => $u->getCompany() !== null);
+        $candidates = array_filter($allUsers, fn($u) => $u->getCompany() === null && !in_array('ROLE_ADMIN', $u->getRoles()));
+
+        $stats = [
+            'totalUsers' => count($allUsers),
+            'admins' => count($admins),
+            'companies' => count($companies),
+            'candidates' => count($candidates),
+        ];
 
         return $this->render('admin/stats/users.html.twig', [
-            // TODO: Pass statistics
+            'stats' => $stats,
         ]);
     }
 
     #[Route('/companies', name: 'admin_stats_companies', methods: ['GET'])]
     public function companyStats(CompanyRepository $companyRepository): Response
     {
-        // TODO: Show detailed company statistics
+        $allCompanies = $companyRepository->findAll();
+
+        $stats = [
+            'totalCompanies' => count($allCompanies),
+            'approvedCompanies' => count(array_filter($allCompanies, fn($c) => $c->isApproved())),
+            'pendingCompanies' => count(array_filter($allCompanies, fn($c) => !$c->isApproved())),
+            'activeCompanies' => count(array_filter($allCompanies, fn($c) => $c->isActive())),
+        ];
 
         return $this->render('admin/stats/companies.html.twig', [
-            // TODO: Pass statistics
+            'stats' => $stats,
         ]);
     }
 
     #[Route('/applications', name: 'admin_stats_applications', methods: ['GET'])]
     public function applicationStats(ApplicationRepository $applicationRepository): Response
     {
-        // TODO: Show detailed application statistics
+        $allApplications = $applicationRepository->findAll();
+
+        // Count applications by status
+        $applicationsByStatus = [
+            'PENDING' => 0,
+            'ACCEPTED' => 0,
+            'REJECTED' => 0,
+            'WITHDRAWN' => 0,
+        ];
+        foreach ($allApplications as $app) {
+            $status = $app->getStatus();
+            if (isset($applicationsByStatus[$status])) {
+                $applicationsByStatus[$status]++;
+            }
+        }
+
+        $stats = [
+            'totalApplications' => count($allApplications),
+            'byStatus' => $applicationsByStatus,
+        ];
 
         return $this->render('admin/stats/applications.html.twig', [
-            // TODO: Pass statistics
+            'stats' => $stats,
         ]);
     }
 }

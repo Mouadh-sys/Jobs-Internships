@@ -41,11 +41,13 @@
                 <a href="{{ path('admin_offer_show', {id: offer.id}) }}" class="btn btn-primary">View</a>
                 <a href="{{ path('admin_offer_edit', {id: offer.id}) }}" class="btn btn-warning">Edit</a>
                 <form method="post" action="{{ path('admin_offer_toggle', {id: offer.id}) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ offer.id) }}">
                     <button type="submit" class="btn {{ offer.isActive ? 'btn-warning' : 'btn-success' }}">
                         {{ offer.isActive ? 'Deactivate' : 'Activate' }}
                     </button>
                 </form>
                 <form method="post" action="{{ path('admin_offer_delete', {id: offer.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offer.id) }}">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </td>

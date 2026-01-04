@@ -68,9 +68,7 @@
 
                     {% if not application.isAccepted and not application.isRejected and not application.isWithdrawn %}
                     <form method="post" action="{{ path('candidate_application_withdraw', {id: application.id}) }}" style="display: inline; float: right;">
-                        {% if csrf_token('candidate_application_withdraw') %}
-                        <input type="hidden" name="_token" value="{{ csrf_token('candidate_application_withdraw') }}">
-                        {% endif %}
+                        <input type="hidden" name="_token" value="{{ csrf_token('withdraw' ~ application.id) }}">
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to withdraw this application?');">
                             Withdraw Application
                         </button>

@@ -18,32 +18,55 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminCompanyController extends AbstractController
 {
     #[Route('', name: 'admin_companies_list', methods: ['GET'])]
-    public function list(CompanyRepository $companyRepository): Response
+    public function list(CompanyRepository $companyRepository, Request $request): Response
     {
-        // TODO: List all companies with pagination
-        // - Show approval status
-        // - Show active status
-        // - Filter by status
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $status = $request->query->get('status', '');
+
+        // Get all companies
+        $allCompanies = $companyRepository->findAll();
+        $totalCompanies = count($allCompanies);
+
+        // Simple filtering by status
+        $filteredCompanies = $allCompanies;
+        if ($status === 'approved') {
+            $filteredCompanies = array_filter($allCompanies, fn($c) => $c->isApproved());
+        } elseif ($status === 'pending') {
+            $filteredCompanies = array_filter($allCompanies, fn($c) => !$c->isApproved());
+        } elseif ($status === 'active') {
+            $filteredCompanies = array_filter($allCompanies, fn($c) => $c->isActive());
+        } elseif ($status === 'inactive') {
+            $filteredCompanies = array_filter($allCompanies, fn($c) => !$c->isActive());
+        }
+
+        // Apply pagination
+        $companies = array_slice($filteredCompanies, $offset, $limit);
+        $totalFiltered = count($filteredCompanies);
+        $totalPages = ceil($totalFiltered / $limit);
 
         return $this->render('admin/companies/list.html.twig', [
-            // TODO: Pass companies
+            'companies' => $companies,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'status' => $status,
         ]);
     }
 
     #[Route('/pending', name: 'admin_companies_pending', methods: ['GET'])]
     public function pending(CompanyRepository $companyRepository): Response
     {
-        // TODO: List pending companies for approval
+        $companies = $companyRepository->findPendingCompanies();
 
         return $this->render('admin/companies/pending.html.twig', [
-            // TODO: Pass pending companies
+            'companies' => $companies,
         ]);
     }
 
     #[Route('/{id}', name: 'admin_company_show', methods: ['GET'])]
     public function show(Company $company): Response
     {
-        // TODO: Show company details
 
         return $this->render('admin/companies/show.html.twig', [
             'company' => $company,
@@ -53,20 +76,36 @@ class AdminCompanyController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_company_edit', methods: ['GET', 'POST'])]
     public function edit(Company $company, Request $request, EntityManagerInterface $entityManager): Response
     {
-        // TODO: Edit company
-        // - Use AdminCompanyType form
+        $form = $this->createForm(AdminCompanyType::class, $company);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($company);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Company updated successfully.');
+            return $this->redirectToRoute('admin_company_show', ['id' => $company->getId()]);
+        }
 
         return $this->render('admin/companies/form.html.twig', [
-            // TODO: Pass form
+            'form' => $form,
             'company' => $company,
         ]);
     }
 
     #[Route('/{id}/approve', name: 'admin_company_approve', methods: ['POST'])]
     public function approve(
+        Request $request,
         Company $company,
         CompanyApprovalService $approvalService,
     ): Response {
+        // Verify CSRF token
+        $tokenId = 'approve' . $company->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('admin_companies_pending');
+        }
+
         /** @var \App\Entity\User $admin */
         $admin = $this->getUser();
         $approvalService->approve($company, $admin);
@@ -77,10 +116,17 @@ class AdminCompanyController extends AbstractController
 
     #[Route('/{id}/reject', name: 'admin_company_reject', methods: ['POST'])]
     public function reject(
-        Company $company,
         Request $request,
+        Company $company,
         CompanyApprovalService $approvalService,
     ): Response {
+        // Verify CSRF token
+        $tokenId = 'reject' . $company->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('admin_companies_pending');
+        }
+
         /** @var \App\Entity\User $admin */
         $admin = $this->getUser();
         $reason = $request->request->get('reason', '');
@@ -92,8 +138,18 @@ class AdminCompanyController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'admin_company_delete', methods: ['POST'])]
-    public function delete(Company $company, EntityManagerInterface $entityManager): Response
-    {
+    public function delete(
+        Request $request,
+        Company $company,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        // Verify CSRF token
+        $tokenId = 'delete' . $company->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('admin_companies_list');
+        }
+
         $entityManager->remove($company);
         $entityManager->flush();
 

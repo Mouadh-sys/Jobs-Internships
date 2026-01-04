@@ -83,9 +83,17 @@ class ApplicationController extends AbstractController
 
     #[Route('/{id}/withdraw', name: 'candidate_application_withdraw', methods: ['POST'])]
     public function withdraw(
+        Request $request,
         Application $application,
         EntityManagerInterface $entityManager,
     ): Response {
+        // Verify CSRF token
+        $tokenId = 'withdraw' . $application->getId();
+        if (!$this->isCsrfTokenValid($tokenId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('candidate_application_show', ['id' => $application->getId()]);
+        }
+
         // Verify that the logged-in candidate owns this application
         /** @var \App\Entity\User $user */
         $user = $this->getUser();

@@ -40,6 +40,7 @@
                 <a href="{{ path('admin_user_show', {id: user.id}) }}" class="btn btn-primary">View</a>
                 <a href="{{ path('admin_user_edit', {id: user.id}) }}" class="btn btn-warning">Edit</a>
                 <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </td>
