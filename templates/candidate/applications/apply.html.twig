@@ -1,60 +1,375 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/candidate_base.html.twig' %}
 
-{% block title %}Apply to {{ offer.title }}{% endblock %}
+{% block title %}Apply to {{ offer.title }} - Jobs & Internships{% endblock %}
 
-{% block body %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <h2>Apply to {{ offer.title }}</h2>
+{% block breadcrumb %}
+    <span class="breadcrumb-item">Apply to Job</span>
+{% endblock %}
 
-            <div class="card" style="margin: 1.5rem 0;">
-                <div class="card-header">
-                    <h5>{{ offer.company.name }}</h5>
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .apply-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .offer-preview-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .offer-preview-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .offer-preview-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .offer-preview-company {
+            font-size: 1.125rem;
+            color: #6366f1;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .offer-preview-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            color: #6b7280;
+            font-size: 0.9375rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-item strong {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .offer-preview-description {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .offer-preview-description h5 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.75rem;
+        }
+
+        .offer-preview-description p {
+            color: #4b5563;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .application-form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+
+        .form-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .form-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .form-label i {
+            margin-right: 0.5rem;
+            color: #6366f1;
+        }
+
+        .form-textarea,
+        .form-input,
+        .form-file {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+            color: #111827;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-textarea:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-file {
+            padding: 1rem;
+            cursor: pointer;
+            background: white;
+            border: 2px dashed #d1d5db;
+            text-align: center;
+        }
+
+        .form-file:hover {
+            border-color: #6366f1;
+            background: #f9fafb;
+        }
+
+        .form-file:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-hint {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-errors {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-errors ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .form-errors li {
+            color: #991b1b;
+            font-size: 0.9375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-errors li:last-child {
+            margin-bottom: 0;
+        }
+
+        .field-errors {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f3f4f6;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="apply-container">
+    <!-- Offer Preview -->
+    <div class="offer-preview-card">
+        <div class="offer-preview-header">
+            <h2 class="offer-preview-title">{{ offer.title }}</h2>
+            <div class="offer-preview-company">{{ offer.company.name }}</div>
+            <div class="offer-preview-meta">
+                <div class="meta-item">
+                    <strong>Type:</strong> {{ offer.type }}
                 </div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-3">Type</dt>
-                        <dd class="col-sm-9">{{ offer.type }}</dd>
-
-                        <dt class="col-sm-3">Location</dt>
-                        <dd class="col-sm-9">{{ offer.location ?? 'Not specified' }}</dd>
-
-                        <dt class="col-sm-3">Category</dt>
-                        <dd class="col-sm-9">{{ offer.category.name }}</dd>
-                    </dl>
-
-                    <hr>
-
-                    <h5>Description</h5>
-                    <p>{{ offer.description }}</p>
+                <div class="meta-item">
+                    <strong>Location:</strong> {{ offer.location ?? 'Not specified' }}
+                </div>
+                <div class="meta-item">
+                    <strong>Category:</strong> {{ offer.category.name }}
                 </div>
             </div>
+        </div>
+        <div class="offer-preview-description">
+            <h5>Description</h5>
+            <p>{{ offer.description }}</p>
+        </div>
+    </div>
 
-            <h3>Your Application</h3>
-            <form method="post" enctype="multipart/form-data">
-                {{ form_start(form) }}
+    <!-- Application Form -->
+    <div class="application-form-card">
+        <div class="form-header">
+            <h2 class="form-title">Your Application</h2>
+            <p class="form-subtitle">Tell us why you're interested in this position</p>
+        </div>
 
-                <div class="form-group">
-                    {{ form_label(form.message) }}
-                    {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': 5, 'placeholder': 'Tell us why you are interested in this position...'} }) }}
+        {{ form_start(form, {'attr': {'class': 'application-form', 'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+        <!-- Cover Letter -->
+        <div class="form-group">
+            <label for="{{ form.message.vars.id }}" class="form-label">
+                <i class="fas fa-comment"></i>
+                {{ form.message.vars.label|default('Cover Letter') }}
+            </label>
+            {{ form_widget(form.message, {'attr': {'class': 'form-textarea', 'placeholder': 'Tell us why you are interested in this position...', 'rows': 8}}) }}
+            {% if form.message.vars.errors|length > 0 %}
+                <div class="field-errors">
+                    <i class="fas fa-exclamation-circle"></i>
                     {{ form_errors(form.message) }}
                 </div>
+            {% endif %}
+            <div class="form-hint">
+                <i class="fas fa-info-circle"></i>
+                Optional: Add a personalized message to stand out from other candidates
+            </div>
+        </div>
 
-                <div class="form-group">
-                    {{ form_label(form.cvFilename) }}
-                    {{ form_widget(form.cvFilename, {'attr': {'class': 'form-control-file'} }) }}
-                    <small class="form-text text-muted">Maximum file size: 5MB (PDF or DOC)</small>
+        <!-- CV Upload -->
+        <div class="form-group">
+            <label for="{{ form.cvFilename.vars.id }}" class="form-label">
+                <i class="fas fa-file-upload"></i>
+                {{ form.cvFilename.vars.label|default('CV (PDF, DOC)') }}
+            </label>
+            {{ form_widget(form.cvFilename, {'attr': {'class': 'form-file', 'accept': '.pdf,.doc,.docx'}}) }}
+            {% if form.cvFilename.vars.errors|length > 0 %}
+                <div class="field-errors">
+                    <i class="fas fa-exclamation-circle"></i>
                     {{ form_errors(form.cvFilename) }}
                 </div>
-
-                <button type="submit" class="btn btn-primary">Submit Application</button>
-                <a href="{{ path('candidate_offers_browse') }}" class="btn btn-secondary">Cancel</a>
-
-                {{ form_end(form) }}
-            </form>
+            {% endif %}
+            <div class="form-hint">
+                <i class="fas fa-info-circle"></i>
+                Maximum file size: 5MB (PDF or DOC format)
+            </div>
         </div>
+
+        <!-- Form Errors (Global) -->
+        {% if form.vars.errors|length > 0 %}
+            <div class="form-errors">
+                <ul>
+                    {% for error in form.vars.errors %}
+                        <li>{{ error.message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <a href="{{ path('candidate_offer_detail', {slug: offer.slug}) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+                Submit Application
+            </button>
+        </div>
+
+        {{ form_end(form) }}
     </div>
 </div>
 {% endblock %}
-

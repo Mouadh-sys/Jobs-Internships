@@ -1,119 +1,495 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/company_base.html.twig' %}
 
 {% block title %}Application Details{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    
+{% block breadcrumb %}
+    <a href="{{ path('company_applications_list') }}" class="breadcrumb-item hover:text-gray-600">Applications</a>
+    <span class="breadcrumb-item">/</span>
+    <span class="breadcrumb-item">Application Details</span>
 {% endblock %}
 
-{% block body %}
-{% include 'components/company_navbar.html.twig' %}
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-6">
-            <a href="{{ path('company_applications_list') }}" class="text-indigo-600 hover:text-indigo-900">
-                ← Back to Applications
-            </a>
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #10b981;
+            --primary-hover: #059669;
+            --primary-light: #34d399;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .application-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0;
+        }
+
+        .back-button:hover {
+            color: var(--primary-color);
+            transform: translateX(-4px);
+        }
+
+        .back-button i {
+            font-size: 0.875rem;
+        }
+
+        /* Main Card */
+        .detail-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-100);
+            overflow: hidden;
+        }
+
+        /* Card Header */
+        .card-header {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            padding: 2.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(135deg, var(--primary-color), #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-subtitle {
+            font-size: 1rem;
+            color: var(--gray-600);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-subtitle i {
+            font-size: 0.875rem;
+            color: var(--primary-color);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .status-badge.pending {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .status-badge.accepted {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .status-badge.rejected {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .status-badge i {
+            font-size: 0.875rem;
+        }
+
+        /* Card Body */
+        .card-body {
+            padding: 2.5rem;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-label i {
+            font-size: 0.875rem;
+            color: var(--primary-color);
+        }
+
+        .info-value {
+            font-size: 1.0625rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            word-break: break-word;
+        }
+
+        .info-value a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .info-value a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* Cover Letter Section */
+        .cover-letter-section {
+            margin-top: 2.5rem;
+            padding-top: 2.5rem;
+            border-top: 2px solid var(--gray-100);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+            font-size: 1.125rem;
+        }
+
+        .cover-letter-content {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1.5rem;
+            color: var(--gray-700);
+            line-height: 1.7;
+            font-size: 0.9375rem;
+            border: 1px solid var(--gray-200);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .cover-letter-empty {
+            color: var(--gray-500);
+            font-style: italic;
+        }
+
+        /* CV Download Section */
+        .cv-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--gray-100);
+        }
+
+        .cv-download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.75rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            border-radius: 12px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cv-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+        }
+
+        .cv-download-btn i {
+            font-size: 1.125rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            margin-top: 3rem;
+            padding-top: 2.5rem;
+            border-top: 2px solid var(--gray-100);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-btn i {
+            font-size: 1rem;
+        }
+
+        .action-btn-reject {
+            background: #fee2e2;
+            color: var(--danger-color);
+            border: 1px solid #fca5a5;
+        }
+
+        .action-btn-reject:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .action-btn-accept {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .action-btn-accept:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-header {
+                padding: 2rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column-reverse;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="application-detail-container">
+    <!-- Back Button -->
+    <a href="{{ path('company_applications_list') }}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Applications</span>
+    </a>
+
+    <!-- Main Card -->
+    <div class="detail-card">
+        <!-- Card Header -->
+        <div class="card-header">
+            <div class="header-left">
+                <h1 class="card-title">Application Details</h1>
+                <p class="card-subtitle">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Applied on {{ application.createdAt|date('F j, Y') }}</span>
+                </p>
+            </div>
+            <div>
+                {% if application.isPending() %}
+                    <span class="status-badge pending">
+                        <i class="fas fa-clock"></i>
+                        <span>Pending Review</span>
+                    </span>
+                {% elseif application.isAccepted() %}
+                    <span class="status-badge accepted">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Accepted</span>
+                    </span>
+                {% else %}
+                    <span class="status-badge rejected">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Rejected</span>
+                    </span>
+                {% endif %}
+            </div>
         </div>
 
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="rounded-md p-4 mb-6 {{ label == 'success' ? 'bg-green-50' : 'bg-red-50' }}">
-                    <div class="flex">
-                        <div class="ml-3">
-                            <p class="text-sm font-medium {{ label == 'success' ? 'text-green-800' : 'text-red-800' }}">
-                                {{ message }}
-                            </p>
-                        </div>
+        <!-- Card Body -->
+        <div class="card-body">
+            <!-- Info Grid -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-user"></i>
+                        <span>Candidate Name</span>
+                    </div>
+                    <div class="info-value">{{ application.candidate.fullName }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-envelope"></i>
+                        <span>Email Address</span>
+                    </div>
+                    <div class="info-value">
+                        <a href="mailto:{{ application.candidate.email }}">{{ application.candidate.email }}</a>
                     </div>
                 </div>
-            {% endfor %}
-        {% endfor %}
 
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-                <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">
-                        Application Details
-                    </h3>
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                        Applied on {{ application.createdAt|date('F j, Y') }}
-                    </p>
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Location</span>
+                    </div>
+                    <div class="info-value">{{ application.candidate.location|default('Not specified') }}</div>
                 </div>
-                <div>
-                    {% if application.isPending() %}
-                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                            Pending
-                        </span>
-                    {% elseif application.isAccepted() %}
-                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            Accepted
-                        </span>
-                    {% else %}
-                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                            Rejected
-                        </span>
-                    {% endif %}
+
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Offer</span>
+                    </div>
+                    <div class="info-value">{{ application.jobOffer.title }}</div>
                 </div>
             </div>
-            <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
-                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Candidate Name</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ application.candidate.fullName }}</dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Email</dt>
-                        <dd class="mt-1 text-sm text-gray-900">
-                            <a href="mailto:{{ application.candidate.email }}" class="text-indigo-600 hover:text-indigo-900">
-                                {{ application.candidate.email }}
-                            </a>
-                        </dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Location</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ application.candidate.location|default('Not specified') }}</dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Job Offer</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ application.jobOffer.title }}</dd>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <dt class="text-sm font-medium text-gray-500">Cover Letter</dt>
-                        <dd class="mt-1 text-sm text-gray-900">
-                            {{ application.message|default('No cover letter provided.')|nl2br }}
-                        </dd>
-                    </div>
-                    {% if application.cvFilename %}
-                        <div class="sm:col-span-2">
-                            <dt class="text-sm font-medium text-gray-500">CV</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                <a href="{{ path('company_application_cv_download', {id: application.id}) }}" class="text-indigo-600 hover:text-indigo-900">
-                                    📄 Download CV
-                                </a>
-                            </dd>
-                        </div>
-                    {% endif %}
-                </dl>
-            </div>
 
+            <!-- Cover Letter Section -->
+            {% if application.message %}
+                <div class="cover-letter-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Cover Letter</span>
+                    </h2>
+                    <div class="cover-letter-content">{{ application.message|nl2br }}</div>
+                </div>
+            {% else %}
+                <div class="cover-letter-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Cover Letter</span>
+                    </h2>
+                    <div class="cover-letter-content cover-letter-empty">No cover letter provided.</div>
+                </div>
+            {% endif %}
+
+            <!-- CV Download Section -->
+            {% if application.cvFilename %}
+                <div class="cv-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Resume / CV</span>
+                    </h2>
+                    <a href="{{ path('company_application_cv_download', {id: application.id}) }}" class="cv-download-btn">
+                        <i class="fas fa-download"></i>
+                        <span>Download CV</span>
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Action Buttons (only show for pending applications) -->
             {% if application.isPending() %}
-                <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
-                    <div class="flex justify-end space-x-3">
-                        <form method="post" action="{{ path('company_application_reject', {id: application.id}) }}" onsubmit="return confirm('Are you sure you want to reject this application?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ application.id) }}">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                Reject
-                            </button>
-                        </form>
-                        <form method="post" action="{{ path('company_application_accept', {id: application.id}) }}" onsubmit="return confirm('Are you sure you want to accept this application?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ application.id) }}">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                                Accept
-                            </button>
-                        </form>
-                    </div>
+                <div class="action-buttons">
+                    <form method="post" action="{{ path('company_application_reject', {id: application.id}) }}" onsubmit="return confirm('Are you sure you want to reject this application? This action cannot be undone.');" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ application.id) }}">
+                        <button type="submit" class="action-btn action-btn-reject">
+                            <i class="fas fa-times"></i>
+                            <span>Reject Application</span>
+                        </button>
+                    </form>
+                    <form method="post" action="{{ path('company_application_accept', {id: application.id}) }}" onsubmit="return confirm('Are you sure you want to accept this application?');" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ application.id) }}">
+                        <button type="submit" class="action-btn action-btn-accept">
+                            <i class="fas fa-check"></i>
+                            <span>Accept Application</span>
+                        </button>
+                    </form>
                 </div>
             {% endif %}
         </div>

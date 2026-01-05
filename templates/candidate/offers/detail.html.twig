@@ -1,53 +1,209 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/candidate_base.html.twig' %}
 
 {% block title %}Job Offer: {{ offer.title }}{% endblock %}
 
-{% block body %}
-<div style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;">
-    {% for message in app.flashes('success') %}
-        <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
-            {{ message }}
-        </div>
-    {% endfor %}
-    {% for message in app.flashes('warning') %}
-        <div style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
-            {{ message }}
-        </div>
-    {% endfor %}
+{% block breadcrumb %}
+    <span class="breadcrumb-item">Job Details</span>
+{% endblock %}
 
-    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1>{{ offer.title }}</h1>
-        <p style="color: #666; margin: 0.5rem 0;">
-            <strong>Company:</strong> {{ offer.company.name }}<br>
-            <strong>Location:</strong> {{ offer.location ?? 'Not specified' }}<br>
-            <strong>Type:</strong> {{ offer.type }}<br>
-            <strong>Category:</strong> {{ offer.category.name }}<br>
-            <strong>Status:</strong> {{ offer.isActive ? 'Active' : 'Inactive' }}
-        </p>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .offer-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-        <div style="margin: 1.5rem 0; padding-top: 1rem; border-top: 1px solid #ddd;">
+        .offer-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .offer-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .offer-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .offer-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            color: #6b7280;
+            font-size: 0.9375rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-item strong {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .offer-description {
+            margin-top: 2rem;
+        }
+
+        .offer-description h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .offer-description p {
+            color: #4b5563;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .offer-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f3f4f6;
+        }
+
+        .btn-action {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9375rem;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+
+        .btn-unsave {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-unsave:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+            color: white;
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-apply:hover {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="offer-detail-container">
+    <div class="offer-card">
+        <div class="offer-header">
+            <h1 class="offer-title">{{ offer.title }}</h1>
+            <div class="offer-meta">
+                <div class="meta-item">
+                    <strong>Company:</strong> {{ offer.company.name }}
+                </div>
+                <div class="meta-item">
+                    <strong>Location:</strong> {{ offer.location ?? 'Not specified' }}
+                </div>
+                <div class="meta-item">
+                    <strong>Type:</strong> {{ offer.type }}
+                </div>
+                <div class="meta-item">
+                    <strong>Category:</strong> {{ offer.category.name }}
+                </div>
+                <div class="meta-item">
+                    <strong>Status:</strong> {{ offer.isActive ? 'Active' : 'Inactive' }}
+                </div>
+            </div>
+        </div>
+
+        <div class="offer-description">
             <h2>Description</h2>
-            <p style="white-space: pre-wrap;">{{ offer.description }}</p>
+            <p>{{ offer.description }}</p>
         </div>
 
-        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <div class="offer-actions">
             {% if isSaved %}
                 <form method="post" action="{{ path('candidate_offer_unsave', {id: offer.id}) }}" style="display: inline;">
                     <input type="hidden" name="_token" value="{{ csrf_token('unsave_offer_' ~ offer.id) }}">
-                    <button type="submit" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                    <button type="submit" class="btn-action btn-unsave">
+                        <i class="fas fa-bookmark"></i>
                         Unsave Offer
                     </button>
                 </form>
             {% else %}
                 <form method="post" action="{{ path('candidate_offer_save', {id: offer.id}) }}" style="display: inline;">
                     <input type="hidden" name="_token" value="{{ csrf_token('save_offer_' ~ offer.id) }}">
-                    <button type="submit" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                    <button type="submit" class="btn-action btn-save">
+                        <i class="far fa-bookmark"></i>
                         Save Offer
                     </button>
                 </form>
             {% endif %}
-            <a href="{{ path('candidate_offers_list') }}" style="display: inline-block; padding: 0.5rem 1rem; background: #6c757d; color: white; text-decoration: none; border-radius: 4px;">
+            <a href="{{ path('candidate_offers_list') }}" class="btn-action btn-secondary">
+                <i class="fas fa-arrow-left"></i>
                 Back to List
+            </a>
+            <a href="{{ path('candidate_apply_offer', {id: offer.id}) }}" class="btn-action btn-apply">
+                <i class="fas fa-paper-plane"></i>
+                Apply Now
             </a>
         </div>
     </div>

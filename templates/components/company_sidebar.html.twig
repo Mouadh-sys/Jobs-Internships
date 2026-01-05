@@ -1,0 +1,279 @@
+{# Company Sidebar Component #}
+<aside class="company-sidebar" id="companySidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <i class="fas fa-building"></i>
+        </div>
+        <h2 class="sidebar-title">Company Portal</h2>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{{ path('company_profile_show') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'company_profile' ? 'active' : '' }}">
+                    <i class="fas fa-building nav-icon"></i>
+                    <span class="nav-text">My Profile</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ path('company_offers_list') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'company_offer' ? 'active' : '' }}">
+                    <i class="fas fa-briefcase nav-icon"></i>
+                    <span class="nav-text">My Offers</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ path('company_applications_list') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'company_application' ? 'active' : '' }}">
+                    <i class="fas fa-file-alt nav-icon"></i>
+                    <span class="nav-text">Applications</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<style>
+    :root {
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --sidebar-bg: #1f2937;
+        --sidebar-bg-hover: #374151;
+        --sidebar-active-bg: #10b981;
+        --sidebar-text: #e5e7eb;
+        --sidebar-text-active: #ffffff;
+        --sidebar-border: #374151;
+        --transition-speed: 0.3s;
+    }
+
+    .company-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: var(--sidebar-width);
+        background: var(--sidebar-bg);
+        color: var(--sidebar-text);
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        transition: width var(--transition-speed) ease;
+        border-right: 1px solid var(--sidebar-border);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .company-sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    .sidebar-header {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border-bottom: 1px solid var(--sidebar-border);
+        position: relative;
+    }
+
+    .sidebar-logo {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .sidebar-logo i {
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .sidebar-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        transition: opacity var(--transition-speed);
+    }
+
+    .company-sidebar.collapsed .sidebar-title {
+        opacity: 0;
+        width: 0;
+    }
+
+    .sidebar-toggle {
+        position: absolute;
+        right: 1rem;
+        background: var(--sidebar-bg-hover);
+        border: none;
+        color: var(--sidebar-text);
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        margin-left: auto;
+    }
+
+    .sidebar-toggle:hover {
+        background: var(--sidebar-active-bg);
+        color: white;
+    }
+
+    .company-sidebar.collapsed .sidebar-toggle {
+        position: relative;
+        right: 0;
+        margin: 0 auto;
+    }
+
+    .sidebar-nav {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 0;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar-track {
+        background: var(--sidebar-bg);
+    }
+
+    .sidebar-nav::-webkit-scrollbar-thumb {
+        background: var(--sidebar-border);
+        border-radius: 3px;
+    }
+
+    .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav-item {
+        margin: 0.25rem 0.75rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1rem;
+        color: var(--sidebar-text);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all var(--transition-speed);
+        position: relative;
+        white-space: nowrap;
+    }
+
+    .nav-link:hover {
+        background: var(--sidebar-bg-hover);
+        color: white;
+        transform: translateX(4px);
+    }
+
+    .nav-link.active {
+        background: var(--sidebar-active-bg);
+        color: var(--sidebar-text-active);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .nav-link.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 60%;
+        background: white;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .nav-icon {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .nav-text {
+        font-weight: 500;
+        transition: opacity var(--transition-speed);
+    }
+
+    .company-sidebar.collapsed .nav-text {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .company-sidebar.collapsed .nav-link {
+        justify-content: center;
+        padding: 0.875rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .company-sidebar {
+            transform: translateX(-100%);
+        }
+
+        .company-sidebar.open {
+            transform: translateX(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .company-sidebar {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+
+<script>
+    // Sidebar toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('companySidebar');
+        const toggleButton = document.getElementById('sidebarToggle');
+
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                // Save state to localStorage
+                localStorage.setItem('companySidebarCollapsed', sidebar.classList.contains('collapsed'));
+            });
+        }
+
+        // Restore sidebar state from localStorage
+        const isCollapsed = localStorage.getItem('companySidebarCollapsed') === 'true';
+        if (isCollapsed && sidebar) {
+            sidebar.classList.add('collapsed');
+        }
+
+        // Close sidebar on mobile when clicking outside
+        if (window.innerWidth <= 1024) {
+            document.addEventListener('click', function(event) {
+                if (sidebar && !sidebar.contains(event.target) && !event.target.closest('.header-menu-toggle')) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+    });
+</script>
+

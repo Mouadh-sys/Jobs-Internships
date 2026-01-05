@@ -6,8 +6,10 @@ use App\Entity\Skill;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -34,11 +36,10 @@ class UserProfileType extends AbstractType
             ->add('location', TextType::class, [
                 'required' => false,
             ])
-            ->add('skills', EntityType::class, [
-                'class' => Skill::class,
-                'choice_label' => 'name',
-                'multiple' => true,
+            ->add('skillNames', HiddenType::class, [
+                'mapped' => false,
                 'required' => false,
+                'attr' => ['id' => 'skill-names-input'],
             ])
             ->add('cvFilename', FileType::class, [
                 'label' => 'CV (PDF, DOC)',

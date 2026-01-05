@@ -23,10 +23,20 @@ class AdminOfferController extends AbstractController
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = 10;
         $offset = ($page - 1) * $limit;
+        $status = $request->query->get('status', '');
 
-        // Use query builder for pagination
+        // Use query builder for filtering and pagination
         $qb = $jobOfferRepository->createQueryBuilder('j')
             ->orderBy('j.createdAt', 'DESC');
+
+        // Apply status filter
+        if ($status === 'active') {
+            $qb->where('j.isActive = :active')
+                ->setParameter('active', true);
+        } elseif ($status === 'inactive') {
+            $qb->where('j.isActive = :active')
+                ->setParameter('active', false);
+        }
         
         $query = $qb->getQuery();
         $query->setFirstResult($offset)->setMaxResults($limit);
@@ -41,6 +51,7 @@ class AdminOfferController extends AbstractController
             'offers' => $offers,
             'page' => $page,
             'totalPages' => $totalPages,
+            'status' => $status,
         ]);
     }
 

@@ -1,20 +1,899 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/candidate_base.html.twig' %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Edit Profile - Jobs & Internships{% endblock %}
 
-{% block body %}
-    <h1>Edit Profile</h1>
-
-    {{ form_start(form) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.fullName) }}
-        {{ form_row(form.location) }}
-        {{ form_row(form.skills) }}
-        {{ form_row(form.cvFilename) }}
-
-        <button type="submit" class="btn">Save Changes</button>
-    {{ form_end(form) }}
-
-    <a href="{{ path('candidate_profile_show') }}">Back to Profile</a>
+{% block breadcrumb %}
+    <span class="breadcrumb-item">Edit Profile</span>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #818cf8;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .edit-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: white;
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+            flex-shrink: 0;
+        }
+
+        .header-text {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .header-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .header-subtitle {
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+
+        .back-btn {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9375rem;
+        }
+
+        .back-btn:hover {
+            background: var(--gray-200);
+            color: var(--gray-900);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Form Card */
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            padding: 3rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .form-label i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 1.1rem;
+            z-index: 1;
+        }
+
+        .form-input,
+        .form-select,
+        .form-file {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-file {
+            padding: 1rem;
+            cursor: pointer;
+            background: white;
+            border: 2px dashed var(--gray-300);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .form-file:hover {
+            border-color: var(--primary-color);
+            background: var(--gray-50);
+        }
+
+        .form-file:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Skills Tag Input */
+        .skills-tag-input-wrapper {
+            margin-top: 0.75rem;
+        }
+
+        .skills-input-container {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            background: white;
+            border: 2px solid var(--gray-300);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .skills-input-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .skills-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 0.9375rem;
+            color: var(--gray-700);
+            background: transparent;
+        }
+
+        .skills-input::placeholder {
+            color: var(--gray-400);
+        }
+
+        .add-skill-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .add-skill-btn:hover {
+            background: linear-gradient(135deg, var(--primary-hover), #7c3aed);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .add-skill-btn:active {
+            transform: scale(0.95);
+        }
+
+        .add-skill-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .skills-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.625rem;
+            margin-top: 1rem;
+            min-height: 40px;
+        }
+
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.875rem;
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            animation: tagAppear 0.3s ease;
+        }
+
+        @keyframes tagAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .skill-tag-remove {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border: none;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .skill-tag-remove:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .skills-empty-state {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            font-style: italic;
+            padding: 0.5rem 0;
+        }
+
+        /* File Upload Styling */
+        .file-upload-wrapper {
+            position: relative;
+        }
+
+        .file-upload-label {
+            display: block;
+            width: 100%;
+            padding: 1.5rem;
+            border: 2px dashed var(--gray-300);
+            border-radius: 12px;
+            background: var(--gray-50);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .file-upload-icon {
+            font-size: 2.5rem;
+            color: var(--gray-400);
+            margin-bottom: 0.75rem;
+        }
+
+        .file-upload-text {
+            color: var(--gray-700);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-hint {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .file-input-hidden {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .file-name-display {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--gray-100);
+            border-radius: 8px;
+            color: var(--gray-700);
+            font-size: 0.9375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-name-display i {
+            color: var(--success-color);
+        }
+
+        /* Form Errors */
+        .form-errors {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-errors ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .form-errors li {
+            color: var(--danger-color);
+            font-size: 0.9375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-errors li:last-child {
+            margin-bottom: 0;
+        }
+
+        .field-errors {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Flash Messages */
+        .alert {
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert i {
+            font-size: 1.5rem;
+        }
+
+        .alert-message {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--gray-100);
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-hover), #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .edit-container {
+                padding: 0 1rem;
+            }
+
+            .header-card,
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-title {
+                font-size: 1.5rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Custom Select Styling */
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234b5563' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="edit-container">
+        <!-- Header Card -->
+        <div class="header-card">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <div class="header-text">
+                    <h1 class="header-title">Edit Profile</h1>
+                    <p class="header-subtitle">Update your personal information and preferences</p>
+                </div>
+                <a href="{{ path('candidate_profile_show') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <div class="alert-message">{{ message }}</div>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="alert-message">{{ message }}</div>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+        {% endfor %}
+
+        <!-- Form Card -->
+        <div class="form-card">
+            {{ form_start(form, {'attr': {'class': 'profile-edit-form', 'novalidate': 'novalidate', 'data-turbo': 'false'}}) }}
+
+            <!-- Email Field -->
+            <div class="form-group">
+                <label for="{{ form.email.vars.id }}" class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    {{ form.email.vars.label|default('Email') }}
+                </label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    {{ form_widget(form.email, {'attr': {'class': 'form-input', 'placeholder': 'your.email@example.com'}}) }}
+                </div>
+                {% if form.email.vars.errors|length > 0 %}
+                    <div class="field-errors">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form_errors(form.email) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Full Name Field -->
+            <div class="form-group">
+                <label for="{{ form.fullName.vars.id }}" class="form-label">
+                    <i class="fas fa-user"></i>
+                    {{ form.fullName.vars.label|default('Full Name') }}
+                </label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user input-icon"></i>
+                    {{ form_widget(form.fullName, {'attr': {'class': 'form-input', 'placeholder': 'John Doe'}}) }}
+                </div>
+                {% if form.fullName.vars.errors|length > 0 %}
+                    <div class="field-errors">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form_errors(form.fullName) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Location Field -->
+            <div class="form-group">
+                <label for="{{ form.location.vars.id }}" class="form-label">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ form.location.vars.label|default('Location') }}
+                </label>
+                <div class="input-wrapper">
+                    <i class="fas fa-map-marker-alt input-icon"></i>
+                    {{ form_widget(form.location, {'attr': {'class': 'form-input', 'placeholder': 'City, Country'}}) }}
+                </div>
+                {% if form.location.vars.errors|length > 0 %}
+                    <div class="field-errors">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form_errors(form.location) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Skills Field -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-tags"></i>
+                    Skills
+                </label>
+                <div class="skills-tag-input-wrapper">
+                    <div class="skills-input-container">
+                        <input type="text" 
+                               id="skill-input" 
+                               class="skills-input" 
+                               placeholder="Type a skill and click add"
+                               autocomplete="off">
+                        <button type="button" class="add-skill-btn" id="add-skill-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="skills-tags-container" id="skills-tags-container">
+                        <div class="skills-empty-state" id="skills-empty-state">No skills added yet</div>
+                    </div>
+                </div>
+                {{ form_widget(form.skillNames) }}
+                <small style="color: var(--gray-500); margin-top: 0.75rem; display: block; font-size: 0.875rem;">
+                    <i class="fas fa-info-circle"></i> Type a skill name and click the add button to add it
+                </small>
+            </div>
+
+            <!-- CV Upload Field -->
+            <div class="form-group">
+                <label for="{{ form.cvFilename.vars.id }}" class="form-label">
+                    <i class="fas fa-file-upload"></i>
+                    {{ form.cvFilename.vars.label|default('CV (PDF, DOC)') }}
+                </label>
+                <div class="file-upload-wrapper">
+                    <label for="{{ form.cvFilename.vars.id }}" class="file-upload-label">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-upload"></i>
+                        </div>
+                        <div class="file-upload-text">Click to upload or drag and drop</div>
+                        <div class="file-upload-hint">PDF, DOC or DOCX (Max 5MB)</div>
+                    </label>
+                    {{ form_widget(form.cvFilename, {'attr': {'class': 'file-input-hidden', 'accept': '.pdf,.doc,.docx'}}) }}
+                </div>
+                {% if user.cvFilename %}
+                    <div class="file-name-display">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Current CV: {{ user.cvFilename }}</span>
+                    </div>
+                {% endif %}
+                {% if form.cvFilename.vars.errors|length > 0 %}
+                    <div class="field-errors">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form_errors(form.cvFilename) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Form Errors (Global) -->
+            {% if form.vars.errors|length > 0 %}
+                <div class="form-errors">
+                    <ul>
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{{ path('candidate_profile_show') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <script>
+        // Skills tag input functionality
+        const skillInput = document.getElementById('skill-input');
+        const addSkillBtn = document.getElementById('add-skill-btn');
+        const skillsTagsContainer = document.getElementById('skills-tags-container');
+        const skillsEmptyState = document.getElementById('skills-empty-state');
+        const skillNamesInput = document.getElementById('skill-names-input');
+        let skills = [];
+
+        // Initialize skills from existing user skills
+        {% if user.skills|length > 0 %}
+            skills = [
+                {% for skill in user.skills %}
+                    '{{ skill.name|e('js') }}'{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ];
+            updateSkillsDisplay();
+        {% endif %}
+
+        function addSkill() {
+            const skillName = skillInput.value.trim();
+            if (skillName && !skills.includes(skillName)) {
+                skills.push(skillName);
+                skillInput.value = '';
+                updateSkillsDisplay();
+                updateHiddenField();
+                skillInput.focus();
+            }
+        }
+
+        function removeSkill(skillName) {
+            skills = skills.filter(s => s !== skillName);
+            updateSkillsDisplay();
+            updateHiddenField();
+        }
+
+        function updateSkillsDisplay() {
+            // Hide empty state if there are skills
+            if (skills.length > 0) {
+                skillsEmptyState.style.display = 'none';
+            } else {
+                skillsEmptyState.style.display = 'block';
+            }
+
+            // Clear existing tags
+            const existingTags = skillsTagsContainer.querySelectorAll('.skill-tag');
+            existingTags.forEach(tag => tag.remove());
+
+            // Add new tags
+            skills.forEach((skillName, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'skill-tag';
+                tag.setAttribute('data-skill-index', index);
+                tag.innerHTML = `
+                    <span>${escapeHtml(skillName)}</span>
+                    <button type="button" class="skill-tag-remove" data-skill-name="${escapeHtml(skillName)}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                skillsTagsContainer.appendChild(tag);
+            });
+
+            // Add event listeners to remove buttons
+            const removeButtons = skillsTagsContainer.querySelectorAll('.skill-tag-remove');
+            removeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const skillNameToRemove = this.getAttribute('data-skill-name');
+                    // Unescape HTML entities for comparison
+                    const unescapedName = skillNameToRemove
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#039;/g, "'");
+                    removeSkill(unescapedName);
+                });
+            });
+
+            // Update hidden input with JSON array
+            updateHiddenField();
+        }
+
+        // Always update hidden input when skills change
+        function updateHiddenField() {
+            const input = document.getElementById('skill-names-input');
+            if (input) {
+                input.value = JSON.stringify(skills);
+            }
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Add skill on button click
+        if (addSkillBtn) {
+            addSkillBtn.addEventListener('click', addSkill);
+        }
+
+        // Add skill on Enter key
+        if (skillInput) {
+            skillInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addSkill();
+                }
+            });
+        }
+
+        // Update hidden input before form submission
+        const form = document.querySelector('.profile-edit-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Get the input element again to ensure we have the latest reference
+                const input = document.getElementById('skill-names-input');
+                if (input) {
+                    input.value = JSON.stringify(skills);
+                }
+            }, false); // Use capture phase to set value before form serialization
+        }
+
+        // File upload preview
+        const fileInput = document.getElementById('{{ form.cvFilename.vars.id }}');
+        const fileLabel = fileInput ? fileInput.previousElementSibling : null;
+        
+        if (fileInput && fileLabel) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Update label text
+                    const fileName = file.name;
+                    const fileText = fileLabel.querySelector('.file-upload-text');
+                    if (fileText) fileText.textContent = fileName;
+                    
+                    // Show file size
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    const fileHint = fileLabel.querySelector('.file-upload-hint');
+                    if (fileHint) fileHint.textContent = `File size: ${fileSize} MB`;
+                    
+                    // Change icon color
+                    const fileIcon = fileLabel.querySelector('.file-upload-icon i');
+                    if (fileIcon) {
+                        fileIcon.classList.remove('fa-file-upload');
+                        fileIcon.classList.add('fa-file-check');
+                        fileIcon.style.color = 'var(--success-color)';
+                    }
+                }
+            });
+        }
+    </script>
+{% endblock %}

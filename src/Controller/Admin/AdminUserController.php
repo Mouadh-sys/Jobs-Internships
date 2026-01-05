@@ -24,19 +24,34 @@ class AdminUserController extends AbstractController
         $limit = 10;
         $offset = ($page - 1) * $limit;
         $role = $request->query->get('role', '');
+        $search = $request->query->get('search', '');
 
         // Use query builder for filtering and pagination
         $qb = $userRepository->createQueryBuilder('u')
             ->orderBy('u.createdAt', 'DESC');
 
-        if ($role === 'admin') {
-            $qb->where("JSON_CONTAINS(u.roles, :role) = 1")
-                ->setParameter('role', json_encode('ROLE_ADMIN'));
-        } elseif ($role === 'company') {
-            $qb->where('u.company IS NOT NULL');
+        // Apply search filter
+        if (!empty($search)) {
+            $qb->andWhere('u.email LIKE :search OR u.fullName LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        // Apply role filter
+        if ($role === 'ROLE_ADMIN' || $role === 'admin') {
+            $qb->andWhere("u.roles LIKE :role")
+                ->setParameter('role', '%ROLE_ADMIN%');
+        } elseif ($role === 'ROLE_COMPANY' || $role === 'company') {
+            $qb->leftJoin('App\Entity\Company', 'c', 'WITH', 'c.user = u')
+                ->andWhere('c.id IS NOT NULL');
+        } elseif ($role === 'ROLE_USER') {
+            // ROLE_USER means users who don't have ROLE_ADMIN and don't have a Company
+            // This filters for regular users (candidates)
+            $qb->leftJoin('App\Entity\Company', 'c', 'WITH', 'c.user = u')
+                ->andWhere('c.id IS NULL')
+                ->andWhere("u.roles NOT LIKE '%ROLE_ADMIN%'");
         } elseif ($role === 'candidate') {
             $qb->leftJoin('App\Entity\Company', 'c', 'WITH', 'c.user = u')
-                ->where('c.id IS NULL')
+                ->andWhere('c.id IS NULL')
                 ->andWhere("u.roles NOT LIKE '%ROLE_ADMIN%'");
         }
 
@@ -54,6 +69,7 @@ class AdminUserController extends AbstractController
             'page' => $page,
             'totalPages' => $totalPages,
             'role' => $role,
+            'search' => $search,
         ]);
     }
 

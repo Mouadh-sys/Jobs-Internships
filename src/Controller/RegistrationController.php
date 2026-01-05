@@ -35,6 +35,32 @@ class RegistrationController extends AbstractController
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
+        // Debug: Log form state
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $errors = [];
+            // Get all form errors recursively
+            $formErrors = $form->getErrors(true);
+            foreach ($formErrors as $error) {
+                if (method_exists($error, 'getMessage')) {
+                    $errors[] = $error->getMessage();
+                }
+            }
+            // Also check individual field errors
+            foreach ($form->all() as $child) {
+                $childErrors = $child->getErrors();
+                foreach ($childErrors as $error) {
+                    if (method_exists($error, 'getMessage')) {
+                        $errors[] = ucfirst($child->getName()) . ': ' . $error->getMessage();
+                    }
+                }
+            }
+            if (!empty($errors)) {
+                $this->addFlash('error', 'Please fix the following errors: ' . implode(', ', array_unique($errors)));
+            } else {
+                $this->addFlash('error', 'Please check all fields and try again.');
+            }
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             $accountType = $form->get('accountType')->getData();
             $companyName = $form->get('companyName')->getData();

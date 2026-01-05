@@ -1,0 +1,381 @@
+{# Admin Header Component #}
+<header class="admin-header" id="adminHeader">
+    <div class="header-left">
+        <button class="header-menu-toggle" id="headerMenuToggle" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="header-breadcrumb">
+            {% block breadcrumb %}
+                <span class="breadcrumb-item">Dashboard</span>
+            {% endblock %}
+        </div>
+    </div>
+
+    <div class="header-right">
+        <div class="header-actions">
+            <div class="header-user-menu">
+                <button class="header-user-btn" id="userMenuToggle" aria-label="User menu">
+                    <div class="user-avatar-small">
+                        {{ app.user.fullName|first|upper }}
+                    </div>
+                    <span class="user-name-small">{{ app.user.fullName }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-user-avatar">
+                            {{ app.user.fullName|first|upper }}
+                        </div>
+                        <div class="dropdown-user-info">
+                            <div class="dropdown-user-name">{{ app.user.fullName }}</div>
+                            <div class="dropdown-user-email">{{ app.user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <form method="post" action="{{ path('_logout_main') }}" style="margin: 0;">
+                        <button type="submit" class="dropdown-item dropdown-item-danger" style="width: 100%; border: none; background: none; cursor: pointer; padding: 0.875rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.9375rem; text-align: left;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<style>
+    :root {
+        --header-height: 70px;
+        --header-bg: #ffffff;
+        --header-border: #e5e7eb;
+        --header-text: #374151;
+        --header-text-light: #6b7280;
+        --header-hover: #f3f4f6;
+        --header-active: #9333ea;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --transition-speed: 0.3s;
+    }
+
+    .admin-header {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: var(--header-height);
+        background: var(--header-bg);
+        border-bottom: 1px solid var(--header-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        z-index: 999;
+        box-shadow: var(--shadow-sm);
+        transition: left var(--transition-speed) ease;
+    }
+
+    .admin-sidebar.collapsed ~ .admin-main-content .admin-header {
+        left: var(--sidebar-collapsed-width);
+    }
+
+    @media (max-width: 1024px) {
+        .admin-header {
+            left: 0;
+        }
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex: 1;
+    }
+
+    .header-menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--header-text);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: background var(--transition-speed);
+    }
+
+    .header-menu-toggle:hover {
+        background: var(--header-hover);
+    }
+
+    @media (max-width: 1024px) {
+        .header-menu-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    .header-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9375rem;
+        color: var(--header-text-light);
+    }
+
+    .breadcrumb-item {
+        font-weight: 500;
+        color: var(--header-text);
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-user-menu {
+        position: relative;
+    }
+
+    .header-user-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        background: var(--header-hover);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+    }
+
+    .header-user-btn:hover {
+        background: var(--header-active);
+        color: white;
+    }
+
+    .header-user-btn:hover .user-name-small {
+        color: white;
+    }
+
+    .user-avatar-small {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #9333ea, #7c3aed);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .user-name-small {
+        font-weight: 500;
+        font-size: 0.9375rem;
+        color: var(--header-text);
+        transition: color var(--transition-speed);
+    }
+
+    .header-user-btn i {
+        font-size: 0.75rem;
+        color: var(--header-text-light);
+        transition: transform var(--transition-speed);
+    }
+
+    .header-user-btn:hover i {
+        color: white;
+    }
+
+    .header-user-menu.open .header-user-btn i {
+        transform: rotate(180deg);
+    }
+
+    .user-dropdown {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        width: 280px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all var(--transition-speed);
+        z-index: 1000;
+        border: 1px solid var(--header-border);
+    }
+
+    .header-user-menu.open .user-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .dropdown-header {
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .dropdown-user-avatar {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #9333ea, #7c3aed);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: white;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+    }
+
+    .dropdown-user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .dropdown-user-name {
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: var(--header-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .dropdown-user-email {
+        font-size: 0.8125rem;
+        color: var(--header-text-light);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: var(--header-border);
+        margin: 0.5rem 0;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1.25rem;
+        color: var(--header-text);
+        text-decoration: none;
+        transition: all var(--transition-speed);
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-size: 0.9375rem;
+    }
+
+    .dropdown-item:hover {
+        background: var(--header-hover);
+        color: var(--header-active);
+    }
+
+    .dropdown-item i {
+        width: 20px;
+        text-align: center;
+        color: var(--header-text-light);
+    }
+
+    .dropdown-item:hover i {
+        color: var(--header-active);
+    }
+
+    .dropdown-item-danger {
+        color: #ef4444;
+    }
+
+    .dropdown-item-danger:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+        .user-name-small {
+            display: none;
+        }
+
+        .header-user-btn {
+            padding: 0.5rem;
+        }
+
+        .user-dropdown {
+            right: -1rem;
+            width: calc(100vw - 2rem);
+            max-width: 280px;
+        }
+    }
+</style>
+
+<script>
+    // Header menu toggle and user dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        const headerMenuToggle = document.getElementById('headerMenuToggle');
+        const userMenuToggle = document.getElementById('userMenuToggle');
+        const userDropdown = document.getElementById('userDropdown');
+        const userMenu = document.querySelector('.header-user-menu');
+
+        // Toggle sidebar on mobile
+        if (headerMenuToggle) {
+            headerMenuToggle.addEventListener('click', function() {
+                const sidebar = document.getElementById('adminSidebar');
+                if (sidebar) {
+                    sidebar.classList.toggle('open');
+                }
+            });
+        }
+
+        // Toggle user dropdown
+        if (userMenuToggle) {
+            userMenuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userMenu.classList.toggle('open');
+            });
+        }
+
+        // Handle logout form
+        const logoutForm = userMenu ? userMenu.querySelector('form[action*="logout"]') : null;
+        if (logoutForm) {
+            const logoutButton = logoutForm.querySelector('button[type="submit"]');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // Form will submit normally
+                });
+            }
+        }
+
+        // Close dropdown when clicking outside (but not on logout form)
+        document.addEventListener('click', function(e) {
+            if (userMenu && !userMenu.contains(e.target) && !e.target.closest('form[action*="logout"]')) {
+                userMenu.classList.remove('open');
+            }
+        });
+    });
+</script>
+

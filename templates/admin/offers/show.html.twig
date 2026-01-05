@@ -2,27 +2,768 @@
 
 {% block title %}Job Offer Details{% endblock %}
 
-{% block body %}
-<h2>Job Offer Details</h2>
-<a href="{{ path('admin_offers_list') }}" class="btn">Back to List</a>
-<a href="{{ path('admin_offer_edit', {id: offer.id}) }}" class="btn btn-warning">Edit</a>
-
-<div style="background: white; padding: 2rem; margin-top: 1rem; border-radius: 8px;">
-    <p><strong>ID:</strong> {{ offer.id }}</p>
-    <p><strong>Title:</strong> {{ offer.title }}</p>
-    <p><strong>Slug:</strong> {{ offer.slug }}</p>
-    <p><strong>Company:</strong> {{ offer.company.name }}</p>
-    <p><strong>Category:</strong> {{ offer.category.name }}</p>
-    <p><strong>Type:</strong> {{ offer.type }}</p>
-    <p><strong>Location:</strong> {{ offer.location ?? 'N/A' }}</p>
-    <p><strong>Active:</strong> {{ offer.isActive ? 'Yes' : 'No' }}</p>
-    <p><strong>Applications:</strong> {{ offer.applications|length }}</p>
-    <p><strong>Description:</strong></p>
-    <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
-        {{ offer.description|nl2br }}
-    </div>
-    <p><strong>Created At:</strong> {{ offer.createdAt|date('Y-m-d H:i:s') }}</p>
-    <p><strong>Updated At:</strong> {{ offer.updatedAt|date('Y-m-d H:i:s') }}</p>
-</div>
+{% block breadcrumb %}
+    <a href="{{ path('admin_offers_list') }}" class="breadcrumb-item" style="text-decoration: none; color: inherit;">Job Offers</a>
+    <span class="breadcrumb-item">/</span>
+    <span class="breadcrumb-item">Offer Details</span>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #9333ea;
+            --primary-hover: #7c3aed;
+            --primary-light: #a855f7;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .offer-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Back Button */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+            transform: translateX(-4px);
+        }
+
+        .back-link i {
+            font-size: 0.875rem;
+        }
+
+        /* Main Card */
+        .detail-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-100);
+            overflow: hidden;
+        }
+
+        /* Card Header */
+        .detail-header {
+            background: linear-gradient(135deg, #fef3ff, #f3e8ff);
+            padding: 2.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .detail-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin: 0 0 0.75rem 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+
+        .detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9375rem;
+            color: var(--gray-600);
+        }
+
+        .meta-item i {
+            color: var(--primary-color);
+            font-size: 0.875rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-back:hover {
+            background: var(--gray-200);
+            transform: translateY(-1px);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #d97706, var(--warning-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Card Body */
+        .detail-body {
+            padding: 2.5rem;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+
+        .info-item:hover {
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-2px);
+        }
+
+        .info-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-label i {
+            font-size: 0.875rem;
+            color: var(--primary-color);
+        }
+
+        .info-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            word-break: break-word;
+        }
+
+        .info-value a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .info-value a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* Status Badges Section */
+        .status-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .status-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-badge-active {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .status-badge-inactive {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .status-badge i {
+            font-size: 0.875rem;
+        }
+
+        /* Description Section */
+        .description-section {
+            margin-bottom: 2rem;
+        }
+
+        .description-content {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--gray-200);
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--gray-700);
+            white-space: pre-wrap;
+        }
+
+        /* Company Section */
+        .company-section {
+            margin-bottom: 2rem;
+        }
+
+        .company-card {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .company-card:hover {
+            background: white;
+            border-color: #10b981;
+            box-shadow: var(--shadow-sm);
+            text-decoration: none;
+        }
+
+        .company-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .company-logo-small {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .company-logo-small img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .company-logo-small i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .company-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .company-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .company-email {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* Applications Section */
+        .applications-section {
+            margin-bottom: 2rem;
+        }
+
+        .applications-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            font-weight: 700;
+            font-size: 1.125rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        .applications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .application-item {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .application-item:hover {
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+            transform: translateX(4px);
+            text-decoration: none;
+        }
+
+        .application-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .application-candidate {
+            font-size: 1.0625rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .application-status {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            padding: 0.375rem 0.75rem;
+            border-radius: 8px;
+        }
+
+        .application-status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .application-status-accepted {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .application-status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .application-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .application-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .application-meta i {
+            color: var(--gray-400);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: 2rem 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-toggle {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+        }
+
+        .btn-toggle:hover {
+            background: linear-gradient(135deg, #059669, var(--success-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-toggle-inactive {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .btn-toggle-inactive:hover {
+            background: linear-gradient(135deg, #d97706, var(--warning-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #dc2626, var(--danger-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .detail-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .btn-header {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="offer-detail-container">
+    <a href="{{ path('admin_offers_list') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Job Offers
+    </a>
+
+    <div class="detail-card">
+        <div class="detail-header">
+            <div class="header-left">
+                <h1 class="detail-title">{{ offer.title }}</h1>
+                <div class="detail-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-building"></i>
+                        {{ offer.company.name }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-folder"></i>
+                        {{ offer.category.name }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        Posted {{ offer.createdAt|date('M d, Y') }}
+                    </span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{{ path('admin_offers_list') }}" class="btn-header btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+                <a href="{{ path('admin_offer_edit', {id: offer.id}) }}" class="btn-header btn-edit">
+                    <i class="fas fa-edit"></i>
+                    Edit Offer
+                </a>
+            </div>
+        </div>
+
+        <div class="detail-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-id-badge"></i>
+                        Offer ID
+                    </span>
+                    <span class="info-value">#{{ offer.id }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-link"></i>
+                        Slug
+                    </span>
+                    <span class="info-value">{{ offer.slug }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-file-contract"></i>
+                        Type
+                    </span>
+                    <span class="info-value">{{ offer.type }}</span>
+                </div>
+
+                {% if offer.location %}
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location
+                    </span>
+                    <span class="info-value">{{ offer.location }}</span>
+                </div>
+                {% endif %}
+
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-briefcase"></i>
+                        Applications
+                    </span>
+                    <span class="info-value">{{ offer.applications|length }} Application{{ offer.applications|length != 1 ? 's' : '' }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Updated At
+                    </span>
+                    <span class="info-value">{{ offer.updatedAt|date('F j, Y \\a\\t g:i A') }}</span>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="status-section">
+                <h2 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Offer Status
+                </h2>
+                <div class="status-badges">
+                    {% if offer.isActive %}
+                        <span class="status-badge status-badge-active">
+                            <i class="fas fa-check-circle"></i>
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-badge-inactive">
+                            <i class="fas fa-minus-circle"></i>
+                            Inactive
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="description-section">
+                <h2 class="section-title">
+                    <i class="fas fa-align-left"></i>
+                    Job Description
+                </h2>
+                <div class="description-content">{{ offer.description|nl2br }}</div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="company-section">
+                <h2 class="section-title">
+                    <i class="fas fa-building"></i>
+                    Company Information
+                </h2>
+                <a href="{{ path('admin_company_show', {id: offer.company.id}) }}" class="company-card">
+                    <div class="company-header">
+                        <div class="company-logo-small">
+                            {% if offer.company.logoFilename %}
+                                <img src="{{ asset('uploads/logos/' ~ offer.company.logoFilename) }}" alt="{{ offer.company.name }}">
+                            {% else %}
+                                <i class="fas fa-building"></i>
+                            {% endif %}
+                        </div>
+                        <div class="company-info">
+                            <div class="company-name">{{ offer.company.name }}</div>
+                            <div class="company-email">{{ offer.company.user.email }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            {% if offer.applications|length > 0 %}
+            <div class="section-divider"></div>
+
+            <div class="applications-section">
+                <h2 class="section-title">
+                    <i class="fas fa-file-alt"></i>
+                    Applications
+                </h2>
+                <div class="applications-count">
+                    <i class="fas fa-file-alt"></i>
+                    {{ offer.applications|length }} Application{{ offer.applications|length != 1 ? 's' : '' }}
+                </div>
+                <div class="applications-list">
+                    {% for application in offer.applications|slice(0, 10) %}
+                        <a href="{{ path('company_application_show', {id: application.id}) }}" class="application-item">
+                            <div class="application-header">
+                                <div class="application-candidate">{{ application.candidate.fullName }}</div>
+                                <div class="application-status application-status-{{ application.status|lower }}">
+                                    {{ application.status }}
+                                </div>
+                            </div>
+                            <div class="application-meta">
+                                <span>
+                                    <i class="fas fa-envelope"></i>
+                                    {{ application.candidate.email }}
+                                </span>
+                                <span>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Applied {{ application.createdAt|date('M d, Y') }}
+                                </span>
+                                {% if application.cvFilename %}
+                                <span>
+                                    <i class="fas fa-file-pdf"></i>
+                                    CV Attached
+                                </span>
+                                {% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                    {% if offer.applications|length > 10 %}
+                        <div style="text-align: center; padding: 1rem; color: var(--gray-600);">
+                            <i class="fas fa-ellipsis-h"></i>
+                            And {{ offer.applications|length - 10 }} more application{{ (offer.applications|length - 10) != 1 ? 's' : '' }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="section-divider"></div>
+
+            <div class="action-buttons">
+                <form method="post" action="{{ path('admin_offer_toggle', {id: offer.id}) }}" onsubmit="return confirm('Are you sure you want to {{ offer.isActive ? 'deactivate' : 'activate' }} this offer?');" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ offer.id) }}">
+                    <button type="submit" class="btn-action {{ offer.isActive ? 'btn-toggle-inactive' : 'btn-toggle' }}">
+                        <i class="fas fa-power-off"></i>
+                        {{ offer.isActive ? 'Deactivate Offer' : 'Activate Offer' }}
+                    </button>
+                </form>
+                <form method="post" action="{{ path('admin_offer_delete', {id: offer.id}) }}" onsubmit="return confirm('Are you sure you want to delete this offer? This action cannot be undone.');" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offer.id) }}">
+                    <button type="submit" class="btn-action btn-delete">
+                        <i class="fas fa-trash-alt"></i>
+                        Delete Offer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

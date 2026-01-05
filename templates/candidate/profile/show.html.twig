@@ -1,41 +1,794 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/candidate_base.html.twig' %}
 
-{% block title %}My Profile{% endblock %}
+{% block title %}My Profile - Jobs & Internships{% endblock %}
 
-{% block body %}
-    <h1>My Profile</h1>
-
-    <div class="profile-info">
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Full Name:</strong> {{ user.fullName }}</p>
-        <p><strong>Location:</strong> {{ user.location|default('Not set') }}</p>
-        <p><strong>Member Since:</strong> {{ user.createdAt|date('Y-m-d') }}</p>
-    </div>
-
-    {% if user.skills|length > 0 %}
-        <h3>Skills</h3>
-        <ul>
-        {% for skill in user.skills %}
-            <li>{{ skill.name }}</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No skills added yet.</p>
-    {% endif %}
-
-    {% if user.cvFilename %}
-        <p>
-            <strong>CV:</strong>
-            <a href="{{ path('candidate_cv_download') }}" class="btn">Download CV</a>
-        </p>
-    {% else %}
-        <p><em>No CV uploaded yet.</em></p>
-    {% endif %}
-
-    <a href="{{ path('candidate_profile_edit') }}" class="btn">Edit Profile</a>
-    <form method="post" action="{{ path('logout') }}" style="display: inline;">
-        <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
-        <button type="submit" class="btn">Logout</button>
-    </form>
+{% block breadcrumb %}
+    <span class="breadcrumb-item">My Profile</span>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #818cf8;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .profile-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Enhanced Profile Header */
+        .profile-header {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            padding: 3.5rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--gray-100);
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+        }
+
+        .profile-header-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-wrapper {
+            flex-shrink: 0;
+        }
+
+        .profile-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-avatar:hover::after {
+            opacity: 0.5;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .profile-name {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .profile-email {
+            color: var(--gray-600);
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-email i {
+            color: var(--primary-color);
+        }
+
+        .profile-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--gray-700);
+            font-size: 0.9375rem;
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, var(--gray-50), white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .meta-item:hover {
+            background: white;
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .meta-item i {
+            color: var(--primary-color);
+            font-size: 1.125rem;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Enhanced Buttons */
+        .btn-modern {
+            padding: 0.875rem 1.75rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.625rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-modern:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+            background: linear-gradient(135deg, var(--primary-hover), #7c3aed);
+            color: white;
+        }
+
+        .btn-primary-modern:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-modern {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-outline-modern:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-danger-modern {
+            background: var(--danger-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger-modern:hover {
+            background: #dc2626;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+
+        /* Enhanced Grid Layout */
+        .profile-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Enhanced Cards */
+        .profile-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.25rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--gray-100);
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #8b5cf6, #ec4899);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .profile-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 2px solid var(--gray-100);
+            position: relative;
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .card-title {
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+
+        /* Enhanced Skills */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .skill-badge {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .skill-badge:hover {
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .skill-badge:hover::before {
+            left: 100%;
+        }
+
+        .skill-badge i {
+            font-size: 0.875rem;
+        }
+
+        /* Enhanced Info Items */
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+            background: var(--gray-50);
+            border: 1px solid transparent;
+        }
+
+        .info-item:hover {
+            background: white;
+            border-color: var(--gray-200);
+            transform: translateX(6px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--gray-700);
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-size: 0.9375rem;
+        }
+
+        .info-label i {
+            color: var(--primary-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        .info-value {
+            color: var(--gray-900);
+            flex: 1;
+            font-weight: 500;
+        }
+
+        /* Enhanced Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--gray-600);
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--gray-400);
+        }
+
+        .empty-state p {
+            font-size: 1.0625rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        /* Enhanced CV Section */
+        .cv-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px dashed var(--primary-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .cv-section:hover {
+            border-color: var(--primary-hover);
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+        }
+
+        .cv-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .cv-filename {
+            color: var(--gray-700);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            font-size: 1.0625rem;
+        }
+
+        .cv-download-btn {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .cv-download-btn:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+
+        /* Badge for card counts */
+        .card-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .profile-content {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0;
+            }
+
+            .profile-container {
+                padding: 0 1rem;
+            }
+
+            .profile-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .profile-header-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+                font-size: 3rem;
+            }
+
+            .profile-info {
+                width: 100%;
+            }
+
+            .profile-name {
+                font-size: 1.75rem;
+            }
+
+            .profile-email {
+                justify-content: center;
+            }
+
+            .profile-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .meta-item {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .profile-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-modern {
+                width: 100%;
+            }
+
+            .profile-content {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .profile-card {
+                padding: 1.5rem;
+            }
+
+            .info-label {
+                min-width: 100px;
+                font-size: 0.875rem;
+            }
+
+            .card-header {
+                flex-wrap: wrap;
+            }
+
+            .card-badge {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .profile-name {
+                font-size: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.125rem;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .info-label {
+                min-width: auto;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .btn-modern:focus,
+        .skill-badge:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Enhanced Profile Header -->
+    <div class="profile-header">
+        <div class="profile-header-content">
+            <div class="profile-avatar-wrapper">
+                <div class="profile-avatar">
+                    {{ user.fullName|first|upper }}
+                </div>
+            </div>
+            
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.fullName }}</h1>
+                <p class="profile-email">
+                    <i class="fas fa-envelope"></i>
+                    {{ user.email }}
+                </p>
+                
+                <div class="profile-meta">
+                    {% if user.location %}
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ user.location }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Member since {{ user.createdAt|date('F Y') }}</span>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <a href="{{ path('candidate_profile_edit') }}" class="btn-modern btn-primary-modern">
+                        <i class="fas fa-edit"></i>
+                        Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Profile Content Grid -->
+    <div class="profile-content">
+        <!-- Enhanced Skills Card -->
+        <div class="profile-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3 class="card-title">Skills</h3>
+                {% if user.skills|length > 0 %}
+                    <span class="card-badge">{{ user.skills|length }}</span>
+                {% endif %}
+            </div>
+            {% if user.skills|length > 0 %}
+                <div class="skills-container">
+                    {% for skill in user.skills %}
+                        <span class="skill-badge">
+                            <i class="fas fa-check-circle"></i>
+                            {{ skill.name }}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <p>No skills added yet</p>
+                    <a href="{{ path('candidate_profile_edit') }}" class="btn-modern btn-outline-modern">
+                        <i class="fas fa-plus"></i>
+                        Add Skills
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Enhanced CV Card -->
+        <div class="profile-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <h3 class="card-title">Resume / CV</h3>
+            </div>
+            {% if user.cvFilename %}
+                <div class="cv-section">
+                    <div class="cv-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <p class="cv-filename">{{ user.cvFilename }}</p>
+                    <a href="{{ path('candidate_cv_download') }}" class="cv-download-btn">
+                        <i class="fas fa-download"></i>
+                        Download CV
+                    </a>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <p>No CV uploaded yet</p>
+                    <a href="{{ path('candidate_profile_edit') }}" class="btn-modern btn-outline-modern">
+                        <i class="fas fa-upload"></i>
+                        Upload CV
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Enhanced Account Information Card -->
+        <div class="profile-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h3 class="card-title">Account Information</h3>
+            </div>
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-envelope"></i>
+                    Email
+                </span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-user"></i>
+                    Full Name
+                </span>
+                <span class="info-value">{{ user.fullName }}</span>
+            </div>
+            {% if user.location %}
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Location
+                </span>
+                <span class="info-value">{{ user.location }}</span>
+            </div>
+            {% endif %}
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-check"></i>
+                    Member Since
+                </span>
+                <span class="info-value">{{ user.createdAt|date('F d, Y') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,225 @@
+{# Company Base Layout #}
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+            --header-height: 70px;
+            --transition-speed: 0.3s;
+            --content-padding: 2rem;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f9fafb;
+        }
+
+        .company-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .company-main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .company-sidebar.collapsed + .company-main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .company-content {
+            margin-top: var(--header-height);
+            padding: var(--content-padding);
+            flex: 1;
+            min-height: calc(100vh - var(--header-height));
+        }
+
+        @media (max-width: 1024px) {
+            .company-main-content {
+                margin-left: 0;
+            }
+
+            .company-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Flash messages styling */
+        .flash-messages {
+            position: fixed;
+            top: calc(var(--header-height) + 1rem);
+            right: 2rem;
+            z-index: 1001;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .flash-message {
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .flash-message-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .flash-message-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .flash-message-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .flash-message-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .flash-message i {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .flash-message-content {
+            flex: 1;
+            font-weight: 500;
+            font-size: 0.9375rem;
+        }
+
+        .flash-message-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            color: inherit;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flash-message-close:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .flash-messages {
+                top: calc(var(--header-height) + 0.5rem);
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="company-layout">
+        {# Include Sidebar #}
+        {% include 'components/company_sidebar.html.twig' %}
+
+        <div class="company-main-content">
+            {# Include Header #}
+            {% include 'components/company_header.html.twig' %}
+
+            {# Flash Messages #}
+            <div class="flash-messages" id="flashMessages">
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="flash-message flash-message-{{ type }}">
+                            {% if type == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elseif type == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% elseif type == 'warning' %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle"></i>
+                            {% endif %}
+                            <div class="flash-message-content">{{ message }}</div>
+                            <button type="button" class="flash-message-close" onclick="this.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+
+            {# Main Content #}
+            <main class="company-content">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Auto-remove flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+
+        // Add slideOut animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+{% endblock %}
+

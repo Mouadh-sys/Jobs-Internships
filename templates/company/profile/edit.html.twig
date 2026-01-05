@@ -1,16 +1,18 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/company_base.html.twig' %}
 
 {% block title %}Edit Company Profile{% endblock %}
 
-{% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h4 class="mb-0">Edit Profile</h4>
-                </div>
-                <div class="card-body p-4">
+{% block breadcrumb %}
+    <span class="breadcrumb-item">Edit Profile</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-900">Edit Profile</h2>
+        </div>
+        <div class="p-6">
                     {{ form_start(form) }}
                         <div class="mb-3">
                             {{ form_row(form.name, {'attr': {'class': 'form-control', 'placeholder': 'Company Name'}}) }}
@@ -41,8 +43,6 @@
                             <button class="btn btn-primary px-4">{{ button_label|default('Update Profile') }}</button>
                         </div>
                     {{ form_end(form) }}
-                </div>
-            </div>
         </div>
     </div>
 </div>

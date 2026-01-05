@@ -29,6 +29,12 @@ class AdminStatsController extends AbstractController
 
         // Count pending companies
         $pendingCompanies = count(array_filter($allCompanies, fn($c) => !$c->isApproved()));
+        $activeCompanies = count(array_filter($allCompanies, fn($c) => $c->isActive()));
+        $inactiveCompanies = count(array_filter($allCompanies, fn($c) => !$c->isActive()));
+
+        // Count active/inactive offers
+        $activeOffers = count(array_filter($allOffers, fn($o) => $o->isActive()));
+        $inactiveOffers = count(array_filter($allOffers, fn($o) => !$o->isActive()));
 
         // Count applications by status
         $applicationsByStatus = [
@@ -49,8 +55,15 @@ class AdminStatsController extends AbstractController
             'totalCompanies' => count($allCompanies),
             'approvedCompanies' => count(array_filter($allCompanies, fn($c) => $c->isApproved())),
             'pendingCompanies' => $pendingCompanies,
+            'activeCompanies' => $activeCompanies,
+            'inactiveCompanies' => $inactiveCompanies,
             'totalOffers' => count($allOffers),
+            'activeOffers' => $activeOffers,
+            'inactiveOffers' => $inactiveOffers,
             'totalApplications' => count($allApplications),
+            'pendingApplications' => $applicationsByStatus['PENDING'],
+            'acceptedApplications' => $applicationsByStatus['ACCEPTED'],
+            'rejectedApplications' => $applicationsByStatus['REJECTED'],
             'applicationsByStatus' => $applicationsByStatus,
         ];
 

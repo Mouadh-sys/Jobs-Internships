@@ -2,22 +2,600 @@
 
 {% block title %}User Details{% endblock %}
 
-{% block body %}
-<h2>User Details</h2>
-<a href="{{ path('admin_users_list') }}" class="btn">Back to List</a>
-<a href="{{ path('admin_user_edit', {id: user.id}) }}" class="btn btn-warning">Edit</a>
-
-<div style="background: white; padding: 2rem; margin-top: 1rem; border-radius: 8px;">
-    <p><strong>ID:</strong> {{ user.id }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Full Name:</strong> {{ user.fullName }}</p>
-    <p><strong>Roles:</strong> {{ user.roles|join(', ') }}</p>
-    <p><strong>Location:</strong> {{ user.location ?? 'N/A' }}</p>
-    <p><strong>CV:</strong> {{ user.cvFilename ?? 'No CV uploaded' }}</p>
-    <p><strong>Created At:</strong> {{ user.createdAt|date('Y-m-d H:i:s') }}</p>
-    {% if user.company %}
-    <p><strong>Company:</strong> {{ user.company.name }}</p>
-    {% endif %}
-</div>
+{% block breadcrumb %}
+    <a href="{{ path('admin_users_list') }}" class="breadcrumb-item" style="text-decoration: none; color: inherit;">Users</a>
+    <span class="breadcrumb-item">/</span>
+    <span class="breadcrumb-item">User Details</span>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #9333ea;
+            --primary-hover: #7c3aed;
+            --primary-light: #a855f7;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .user-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Back Button */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+            transform: translateX(-4px);
+        }
+
+        .back-link i {
+            font-size: 0.875rem;
+        }
+
+        /* Main Card */
+        .detail-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-100);
+            overflow: hidden;
+        }
+
+        /* Card Header */
+        .detail-header {
+            background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+            padding: 2.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-avatar-large {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 8px 20px rgba(147, 51, 234, 0.4);
+        }
+
+        .header-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .detail-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .detail-subtitle {
+            font-size: 1rem;
+            color: var(--gray-600);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-subtitle i {
+            font-size: 0.875rem;
+            color: var(--primary-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-back:hover {
+            background: var(--gray-200);
+            transform: translateY(-1px);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #d97706, var(--warning-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Card Body */
+        .detail-body {
+            padding: 2.5rem;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+
+        .info-item:hover {
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-2px);
+        }
+
+        .info-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-label i {
+            font-size: 0.875rem;
+            color: var(--primary-color);
+        }
+
+        .info-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            word-break: break-word;
+        }
+
+        .info-value a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .info-value a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* Role Badges Section */
+        .role-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .role-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .role-badge-admin {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            color: white;
+        }
+
+        .role-badge-company {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .role-badge-user {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .role-badge i {
+            font-size: 0.875rem;
+        }
+
+        /* Company Section */
+        .company-section {
+            margin-bottom: 2rem;
+        }
+
+        .company-card {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+
+        .company-card:hover {
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .company-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .company-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .company-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9375rem;
+            color: var(--gray-600);
+        }
+
+        .company-detail-item i {
+            width: 20px;
+            color: var(--gray-400);
+            text-align: center;
+        }
+
+        /* CV Section */
+        .cv-section {
+            margin-bottom: 2rem;
+        }
+
+        .btn-download-cv {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            border-radius: 12px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-download-cv:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669, var(--success-color));
+        }
+
+        .no-cv {
+            color: var(--gray-500);
+            font-style: italic;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: 2rem 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        @media (max-width: 768px) {
+            .detail-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-left {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .btn-header {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="user-detail-container">
+    <a href="{{ path('admin_users_list') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Users
+    </a>
+
+    <div class="detail-card">
+        <div class="detail-header">
+            <div class="header-left">
+                <div class="user-avatar-large">
+                    {{ user.fullName|first|upper }}
+                </div>
+                <div class="header-info">
+                    <h1 class="detail-title">{{ user.fullName }}</h1>
+                    <p class="detail-subtitle">
+                        <i class="fas fa-envelope"></i>
+                        {{ user.email }}
+                    </p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{{ path('admin_users_list') }}" class="btn-header btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+                <a href="{{ path('admin_user_edit', {id: user.id}) }}" class="btn-header btn-edit">
+                    <i class="fas fa-edit"></i>
+                    Edit User
+                </a>
+            </div>
+        </div>
+
+        <div class="detail-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-id-badge"></i>
+                        User ID
+                    </span>
+                    <span class="info-value">#{{ user.id }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-envelope"></i>
+                        Email Address
+                    </span>
+                    <span class="info-value">
+                        <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-user"></i>
+                        Full Name
+                    </span>
+                    <span class="info-value">{{ user.fullName }}</span>
+                </div>
+
+                {% if user.location %}
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location
+                    </span>
+                    <span class="info-value">{{ user.location }}</span>
+                </div>
+                {% endif %}
+
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Created At
+                    </span>
+                    <span class="info-value">{{ user.createdAt|date('F j, Y \\a\\t g:i A') }}</span>
+                </div>
+
+                {% if user.cvFilename %}
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-file-pdf"></i>
+                        CV Status
+                    </span>
+                    <span class="info-value">CV Uploaded</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="role-section">
+                <h2 class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    User Roles
+                </h2>
+                <div class="role-badges">
+                    {% for roleItem in user.roles %}
+                        {% if roleItem == 'ROLE_ADMIN' %}
+                            <span class="role-badge role-badge-admin">
+                                <i class="fas fa-shield-alt"></i>
+                                Admin
+                            </span>
+                        {% elseif roleItem == 'ROLE_COMPANY' %}
+                            <span class="role-badge role-badge-company">
+                                <i class="fas fa-building"></i>
+                                Company
+                            </span>
+                        {% elseif roleItem == 'ROLE_USER' %}
+                            <span class="role-badge role-badge-user">
+                                <i class="fas fa-user"></i>
+                                User
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if user.company %}
+            <div class="section-divider"></div>
+
+            <div class="company-section">
+                <h2 class="section-title">
+                    <i class="fas fa-building"></i>
+                    Associated Company
+                </h2>
+                <div class="company-card">
+                    <div class="company-name">{{ user.company.name }}</div>
+                    <div class="company-details">
+                        {% if user.company.description %}
+                        <div class="company-detail-item">
+                            <i class="fas fa-align-left"></i>
+                            <span>{{ user.company.description|slice(0, 100) }}{% if user.company.description|length > 100 %}...{% endif %}</span>
+                        </div>
+                        {% endif %}
+                        {% if user.company.location %}
+                        <div class="company-detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ user.company.location }}</span>
+                        </div>
+                        {% endif %}
+                        {% if user.company.website %}
+                        <div class="company-detail-item">
+                            <i class="fas fa-globe"></i>
+                            <a href="{{ user.company.website }}" target="_blank" style="color: var(--primary-color); text-decoration: none;">{{ user.company.website }}</a>
+                        </div>
+                        {% endif %}
+                        <div class="company-detail-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Status: {% if user.company.isApproved %}Approved{% else %}Pending Approval{% endif %}</span>
+                        </div>
+                        <div class="company-detail-item">
+                            <i class="fas fa-power-off"></i>
+                            <span>Active: {% if user.company.isActive %}Yes{% else %}No{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user.cvFilename %}
+            <div class="section-divider"></div>
+
+            <div class="cv-section">
+                <h2 class="section-title">
+                    <i class="fas fa-file-pdf"></i>
+                    Resume / CV
+                </h2>
+                <a href="{{ asset('uploads/cv/' ~ user.cvFilename) }}" class="btn-download-cv" target="_blank">
+                    <i class="fas fa-download"></i>
+                    Download CV
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

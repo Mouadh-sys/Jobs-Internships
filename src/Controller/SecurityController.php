@@ -15,10 +15,13 @@ class SecurityController extends AbstractController
         // 1. Logic from Code 2: Prevent logged-in users from re-logging
         if ($this->getUser()) {
             // Check roles to redirect to the correct dashboard
-            if ($this->isGranted('ROLE_COMPANY')) {
-                return $this->redirectToRoute('company_dashboard'); // Or your company route
+            if ($this->isGranted('ROLE_ADMIN')) {
+                return $this->redirectToRoute('admin_stats_dashboard');
             }
-            return $this->redirectToRoute('candidate_offers_list'); // Or your candidate route
+            if ($this->isGranted('ROLE_COMPANY')) {
+                return $this->redirectToRoute('company_profile_show');
+            }
+            return $this->redirectToRoute('candidate_offers_list');
         }
 
         // 2. Standard Symfony login logic
@@ -27,5 +30,4 @@ class SecurityController extends AbstractController
             'error' => $authenticationUtils->getLastAuthenticationError(),
         ]);
     }
-
 }

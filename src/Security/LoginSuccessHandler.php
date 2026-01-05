@@ -21,7 +21,18 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
     {
         $roles = $token->getRoleNames();
 
-        if (in_array('ROLE_COMPANY', $roles, true) || in_array('ROLE_ADMIN', $roles, true)) {
+        // Check for admin role first (most specific)
+        if (in_array('ROLE_ADMIN', $roles, true)) {
+            $targetUrl = $this->router->generate('admin_stats_dashboard');
+            $this->logger->debug('Login redirect', [
+                'roles' => $roles,
+                'target_url' => $targetUrl,
+            ]);
+            return new RedirectResponse($targetUrl);
+        }
+
+        // Check for company role
+        if (in_array('ROLE_COMPANY', $roles, true)) {
             $targetUrl = $this->router->generate('company_profile_show');
             $this->logger->debug('Login redirect', [
                 'roles' => $roles,
@@ -30,6 +41,7 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             return new RedirectResponse($targetUrl);
         }
 
+        // Default: redirect candidates to offers list
         $targetUrl = $this->router->generate('app_offers_index');
         $this->logger->debug('Login redirect', [
             'roles' => $roles,
